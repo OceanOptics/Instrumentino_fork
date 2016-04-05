@@ -10,14 +10,14 @@ class InstrumentinoController(object):
     '''
     base class for instrumentino compatible controllers
     '''
-    
+
     def __init__(self, name):
         '''
         init
         '''
         self.name = name
         self.online = False
-        
+
     def __str__(self):
         return self.name + " is on port %s" %(self.serial.port)
 
@@ -44,7 +44,7 @@ class InstrumentinoController(object):
         Returns - True (for succesful connection) or False
         '''
         pass
-    
+
     def Close(self):
         '''
         Close the connection to the controller. To be implemented by subclass.

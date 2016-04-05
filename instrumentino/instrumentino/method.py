@@ -20,7 +20,7 @@ class SysMethod(RunnableItem):
 
     def setRepeatPanel(self, parent):
         '''
-        Set and return the repeat panel 
+        Set and return the repeat panel
         '''
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         panel = wx.Panel(parent)
@@ -33,7 +33,7 @@ class SysMethod(RunnableItem):
         self.maskedTextCtrl.Bind(wx.EVT_KEY_UP, self.onKeyPress)
         sizer.Add(self.maskedTextCtrl, 0, wx.EXPAND)
         return panel
-        
+
     def onKeyPress(self, event):
         '''
         Update the repeat value when changed in panel
@@ -57,7 +57,7 @@ class SysMethod(RunnableItem):
                     errDlg.ShowModal()
                     errDlg.Destroy()
                     return False
-                    
+
             except (IOError, EOFError):
                 errDlg = wx.MessageDialog(cfg.mainFrame, 'Error loading the file',
                                           'Error',
@@ -65,10 +65,10 @@ class SysMethod(RunnableItem):
                 errDlg.ShowModal()
                 errDlg.Destroy()
                 return False
-                
+
             fp.close()
             return True
-        else:    
+        else:
             return True
 
     def onPathChanged(self, evt):
@@ -80,11 +80,11 @@ class SysMethod(RunnableItem):
             self.methodFileName = filename
         else:
             evt.GetEventObject().SetValue('')
-                 
+
     def Run(self):
         '''
         Run the method
-        '''        
+        '''
         fp = file(self.methodFileName, 'r')
         savedFile = pickle.load(fp)
         actions = savedFile.list
@@ -96,7 +96,7 @@ class SysMethod(RunnableItem):
                 action.Run()
                 if cfg.userStopped:
                     return
-                
+
     def __getstate__(self):
         '''
         Copy the object's state from self.__dict__ which contains
@@ -116,14 +116,14 @@ class ActionsListCtrl(ExecutableListCtrl):
     def __init__(self, parent, availableActions, actions=[]):
         self.availableActions = availableActions
         self.availableActionsDict = {action.name: action for action in self.availableActions}
-        ExecutableListCtrl.__init__(self, parent, xrc.XRCCTRL(parent, 'actionsListPanel'), {1: 'Action', 2: 'Parameters'}, '--- Run method ---', actions) 
-   
+        ExecutableListCtrl.__init__(self, parent, xrc.XRCCTRL(parent, 'actionsListPanel'), {1: 'Action', 2: 'Parameters'}, '--- Run method ---', actions)
+
     def getDefaultDataItem(self):
         '''
         Return an empty action item
         '''
-        return copy.deepcopy(self.availableActions[0]) if len(self.availableActions) > 0 else None 
-     
+        return copy.deepcopy(self.availableActions[0]) if len(self.availableActions) > 0 else None
+
     def getFirstColumnWidget(self, panel, listDataItem):
         '''
         Return the widget for the first column (a choice in this case)
@@ -131,8 +131,8 @@ class ActionsListCtrl(ExecutableListCtrl):
         choice = wx.Choice(panel, -1, choices=[availableAction.name for availableAction in self.availableActions])
         choice.SetStringSelection(listDataItem.name)
         choice.Bind(wx.EVT_CHOICE, self.onActionChange)
-        return choice 
-     
+        return choice
+
     def setOtherColumns(self, index, listDataItem):
         '''
         Set the other columns' content
@@ -140,7 +140,7 @@ class ActionsListCtrl(ExecutableListCtrl):
         item = self.list.GetItem(index, self.columnNameToNum['Parameters'])
         item.SetWindow(listDataItem.SetParamsPanel(self.list), expand=True)
         self.list.SetItem(item)
-     
+
     def onActionChange(self, event):
         '''
         Change the action when changed in the panel

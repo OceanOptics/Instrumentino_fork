@@ -9,7 +9,7 @@ class Spellman(SysCompArduino):
     ''' Supports either a unipolar voltage controller or a bipolar voltage controller with a symmetric range [-X,X] '''
     def __init__(self, name, rangeV, rangeI, pinEnable, pinInV, pinInI, pinOutV, pinOutI=None, highFreqPWM=False, pinsVoltsMax=5, safetyMaxAbsVoltage=None, ctlV_I2cDac=None, ctlI_I2cDac=None):
         varEnable = SysVarDigitalArduino('enable', pinEnable, name)
-        
+
         # Reduce maximal pin output according to security voltage
         if safetyMaxAbsVoltage != None:
             divider = safetyMaxAbsVoltage / max(abs(rangeV[0]), abs(rangeV[1]))
@@ -18,8 +18,8 @@ class Spellman(SysCompArduino):
         rangeV[0] *= divider
         rangeV[1] *= divider
         pinsVoltsMaxAdjusted = pinsVoltsMax * divider
-        
-        # set voltage variable according to the voltage range. Use methods defined in the instantiated sub-class 
+
+        # set voltage variable according to the voltage range. Use methods defined in the instantiated sub-class
         if rangeV[0] * rangeV[1] >= 0:
             if ctlV_I2cDac:
                 voltageVar = SysVarAnalogArduinoUnipolar('V', rangeV, pinInV, None, name, 'Voltage', 'kV', self.PreEditV, highFreqPWM=highFreqPWM, pinOutVoltsMax=pinsVoltsMaxAdjusted, pinInVoltsMax=pinsVoltsMaxAdjusted, I2cDac=ctlV_I2cDac)
@@ -29,24 +29,24 @@ class Spellman(SysCompArduino):
             if ctlV_I2cDac:
                 voltageVar = SysVarAnalogArduinoBipolarWithExternalPolarity('V', rangeV, pinInV, None, self.SetPolarityPositive, self.GetPolarityPositive, name, 'Voltage', 'kV', self.PreEditV, highFreqPWM=highFreqPWM, pinOutVoltsMax=pinsVoltsMaxAdjusted, pinInVoltsMax=pinsVoltsMaxAdjusted, I2cDac=ctlV_I2cDac)
             else:
-                voltageVar = SysVarAnalogArduinoBipolarWithExternalPolarity('V', rangeV, pinInV, pinOutV, self.SetPolarityPositive, self.GetPolarityPositive, name, 'Voltage', 'kV', self.PreEditV, highFreqPWM=highFreqPWM, pinOutVoltsMax=pinsVoltsMaxAdjusted, pinInVoltsMax=pinsVoltsMaxAdjusted)            
-        
+                voltageVar = SysVarAnalogArduinoBipolarWithExternalPolarity('V', rangeV, pinInV, pinOutV, self.SetPolarityPositive, self.GetPolarityPositive, name, 'Voltage', 'kV', self.PreEditV, highFreqPWM=highFreqPWM, pinOutVoltsMax=pinsVoltsMaxAdjusted, pinInVoltsMax=pinsVoltsMaxAdjusted)
+
         if ctlI_I2cDac:
             currentVar = SysVarAnalogArduinoUnipolar('I', rangeI, pinInI, None, name, 'Current', 'uA', highFreqPWM=highFreqPWM, pinOutVoltsMax=pinsVoltsMax, pinInVoltsMax=pinsVoltsMax, I2cDac=ctlI_I2cDac)
         else:
             currentVar = SysVarAnalogArduinoUnipolar('I', rangeI, pinInI, pinOutI, name, 'Current', 'uA', highFreqPWM=highFreqPWM, pinOutVoltsMax=pinsVoltsMax, pinInVoltsMax=pinsVoltsMax)
-        
+
         SysCompArduino.__init__(self, name,
                                 (voltageVar, currentVar, varEnable),
                                 'monitor/change High Voltage variables')
-        
+
     def FirstTimeOnline(self):
         self.GetController().PinModeOut(self.vars['enable'].pin)
         super(Spellman, self).FirstTimeOnline()
-        
+
     def PreEditV(self, value):
         pass
-        
+
 
 class SpellmanCZE30PN2000(Spellman):
     def __init__(self, name, pinEnable, pinPolaritySet, pinPolarityPositive, pinInV, pinInI, pinOutV, pinOutI=None, highFreqPWM=False, safetyMaxAbsVoltage=None, ctlV_I2cDac=None, ctlI_I2cDac=None):
@@ -55,10 +55,10 @@ class SpellmanCZE30PN2000(Spellman):
         rangeV = [-30, 30]
         rangeI = [0, 300]
         Spellman.__init__(self, name, rangeV, rangeI, pinEnable, pinInV, pinInI, pinOutV, pinOutI, highFreqPWM=highFreqPWM, pinsVoltsMax=5, safetyMaxAbsVoltage=safetyMaxAbsVoltage, ctlV_I2cDac=ctlV_I2cDac, ctlI_I2cDac=ctlI_I2cDac)
-        
+
     def SetPolarityPositive(self, positive=True):
         self.varPolaritySet.Set('on' if positive else 'off');
-    
+
     def GetPolarityPositive(self):
         return self.varPolarityPositive.Get() == 'on'
 

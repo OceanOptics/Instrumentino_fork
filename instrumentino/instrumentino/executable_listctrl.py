@@ -24,7 +24,7 @@ class ExecutableListCtrl(object):
         self.runButton = (xrc.XRCCTRL(parent, 'runButton'))
         self.addButton = (xrc.XRCCTRL(parent, 'addButton'))
         self.removeButton = (xrc.XRCCTRL(parent, 'removeButton'))
-        self.list = ULC.UltimateListCtrl(self.panel, agwStyle=wx.LC_REPORT 
+        self.list = ULC.UltimateListCtrl(self.panel, agwStyle=wx.LC_REPORT
                                          | wx.LC_VRULES
                                          | wx.LC_HRULES
                                          | ULC.ULC_HAS_VARIABLE_ROW_HEIGHT
@@ -35,32 +35,32 @@ class ExecutableListCtrl(object):
             columnInfo._mask = wx.LIST_MASK_TEXT
             columnInfo._text = name
             self.list.InsertColumnInfo(idx, columnInfo)
-        
+
         if len(listDataItems) == 0:
             listDataItems = [self.getDefaultDataItem(),]
         self.populateList(listDataItems)
         self.listUpdate()
-        
+
         parent.Bind(wx.EVT_BUTTON, self.onAddButton, id=xrc.XRCID('addButton'))
         parent.Bind(wx.EVT_BUTTON, self.onRemoveButton, id=xrc.XRCID('removeButton'))
         parent.Bind(wx.EVT_BUTTON, self.onRunButton, id=xrc.XRCID('runButton'))
-        self.list.Bind(ULC.EVT_LIST_KEY_DOWN, self.onKeyPress)       
+        self.list.Bind(ULC.EVT_LIST_KEY_DOWN, self.onKeyPress)
 
     def populateList(self, listDataItems):
         '''
         Populate the list with items. Delete old ones.
         '''
         self.list.Freeze()
-        # Clear old list        
+        # Clear old list
         item = self.list.GetNextItem(-1)
         while item != -1:
             self.removeListDataItem(item)
             item = self.list.GetNextItem(-1)
-        
+
         # Add all elements
         for _, listDataItem in enumerate(listDataItems):
             self.addListDataItem(listDataItem)
-                        
+
         self.list.Thaw()
         self.listUpdate()
 
@@ -70,7 +70,7 @@ class ExecutableListCtrl(object):
         '''
         for idx in self.columnNumToName.keys():
             self.list.SetColumnWidth(idx, wx.LIST_AUTOSIZE)
-        
+
         self.list.Update()
         self.panel.Refresh()
 
@@ -82,13 +82,13 @@ class ExecutableListCtrl(object):
             listDataItem = self.getDefaultDataItem()
         if listDataItem == None:
             return
-         
+
         insertIndex = self.list.GetFirstSelected() if self.list.GetFirstSelected() != -1 else sys.maxint
         index = self.list.InsertStringItem(insertIndex, '')
         self.list.SetStringItem(index, 0, str(index + 1))
         for col in self.columnNumToName.keys()[1:]:
             self.list.SetStringItem(index, col, '')
-         
+
         item = self.list.GetItem(index, 1)
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         panel = wx.Panel(self.list)
@@ -98,12 +98,12 @@ class ExecutableListCtrl(object):
         item.SetWindow(panel, expand=True)
         self.list.SetItem(item)
         self.list.SetItemData(index, [listDataItem,])
-        
+
         self.setOtherColumns(index, listDataItem)
-        
+
         self.listUpdate()
         self.updateListIndices()
-     
+
     def removeListDataItem(self, index):
         '''
         Remove a list item
@@ -111,12 +111,12 @@ class ExecutableListCtrl(object):
         if index != -1:
             self.list.Freeze()
             self.list.DeleteItem(index)
-            
+
             self.updateListIndices()
-            
+
             self.list.Thaw()
             self.listUpdate()
-    
+
     def updateListIndices(self):
         '''
         Update the indices in the first column. Used when an item is deleted from the middle.
@@ -126,27 +126,27 @@ class ExecutableListCtrl(object):
             self.list.SetStringItem(index, 0, str(index + 1))
             self.list.GetItemWindow(index, 1).SetName(str(index + 1))
             index = self.list.GetNextItem(index)
-            
-    
+
+
     def onAddButton(self, evt):
         '''
         User pressed the add button
         '''
         self.addListDataItem()
-        
+
     def onRemoveButton(self, evt):
         '''
         User pressed the remove button
         '''
         self.removeListDataItem(self.list.GetFirstSelected())
-    
+
     def onRunButton(self, evt):
         '''
         User pressed the Run button
         '''
         worker = RunListThread(self.list, self.runStartString)
         worker.start()
-    
+
     def onKeyPress(self, event):
         '''
         User pressed a key while in the list area
@@ -157,7 +157,7 @@ class ExecutableListCtrl(object):
         if keycode == ord('+'):
             self.addListDataItem()
         event.Skip()
-        
+
     def getDataItemsList(self):
         '''
         Return the list's items
@@ -167,27 +167,27 @@ class ExecutableListCtrl(object):
         while item != -1:
             listDataItems.append(self.list.GetItemData(item)[0])
             item = self.list.GetNextItem(item)
-            
+
         return listDataItems
-    
+
     def getDefaultDataItem(self):
         '''
         Return an empty item. To be implemented by subclass.
         '''
         pass
-     
+
     def getFirstColumnWidget(self, panel, listDataItem):
         '''
         Return the widget for the first column. To be implemented by subclass.
         '''
         pass
-     
+
     def setOtherColumns(self, index, action):
         '''
         Set the other columns' content. To be implemented by subclass.
         '''
         pass
-        
+
 
 class RunnableItem(object):
     '''
@@ -199,7 +199,7 @@ class RunnableItem(object):
         '''
         pass
 
-        
+
 class RunListThread(Thread):
     '''
     Thread class that executes the items in a list
@@ -208,7 +208,7 @@ class RunListThread(Thread):
         Thread.__init__(self)
         self.runStartString = runStartString
         self.list = theList
- 
+
     def getDataItemsAndItems(self):
         '''
         Return a double list of items and data items
@@ -218,9 +218,9 @@ class RunListThread(Thread):
         while item != -1:
             dataItemsAndItems.append((self.list.GetItemData(item)[0], item))
             item = self.list.GetNextItem(item)
-            
+
         return dataItemsAndItems
-    
+
     def run(self):
         '''
         Run the list's items
@@ -230,7 +230,7 @@ class RunListThread(Thread):
         dataItemsAndItems = self.getDataItemsAndItems()
         for dataItem, item in dataItemsAndItems:
             self.list.Select(item, False)
-            
+
         for dataItem, item in dataItemsAndItems:
             self.list.Select(item, True)
             dataItem.Run()
@@ -238,6 +238,6 @@ class RunListThread(Thread):
                 cfg.userStopped = False
                 break
             self.list.Select(item, False)
-        
+
         cfg.UpdateControlsFromOtherThread(False)
         cfg.LogFromOtherThread('')

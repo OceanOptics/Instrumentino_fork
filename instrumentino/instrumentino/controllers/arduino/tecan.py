@@ -7,7 +7,7 @@ from instrumentino import cfg
 
 class TecanSia(SysCompArduino):
     # currently only N0/N1 is supported
-    strokeToSeconds = OrderedDict({'N1': 
+    strokeToSeconds = OrderedDict({'N1':
                                    {0: 1.25,
                                     1: 1.30,
                                     2: 1.39,
@@ -47,17 +47,17 @@ class TecanSia(SysCompArduino):
                                     36: 333.33,
                                     37: 375.00,
                                     38: 428.57,
-                                    39: 500.00, 
-                                    40: 600.00}, 
+                                    39: 500.00,
+                                    40: 600.00},
                                    'N2': {}})
-    
+
     DtCmdStart = '/'
     DtCmdEnd = '\r'
     DtCmdExecute = 'R'
-    
+
     serialBaudrate = 9600
     pumpMaxMicroSteps = 48000
-    
+
     def __init__(self, name, pumpVolumeMiliLit, addressPump, addressMultivalve, pinRx=None, pinTx=None, serialPort=1):
         SysCompArduino.__init__(self, 'SIA', (), "send commands to the SIA")
         self.serialPort = serialPort
@@ -70,7 +70,7 @@ class TecanSia(SysCompArduino):
         self.pumpVolumeMiliLit = pumpVolumeMiliLit
         self.addressPump = addressPump
         self.addressMultivalve = addressMultivalve
-        
+
     def sendCommand(self, address, command, waitForAnswerSec=None):
         self.GetController().SerSend(self.DtCmdStart + address + command + self.DtCmdExecute + self.DtCmdEnd, waitForAnswerSec, self.useSoftSer, self.serialPort)
 
@@ -80,47 +80,47 @@ class TecanSia(SysCompArduino):
     def InitPumpAndMultivalve(self, pumpInitCmd='N1ZJ0', valveInitCmd='ZJ0'):
         self.sendCommand(self.addressPump, pumpInitCmd, waitForAnswerSec=3)
         self.sendCommand(self.addressMultivalve, valveInitCmd, waitForAnswerSec=1)
-        
+
     def selectMultivalvePort(self, port, moveDirection='O', waitForAnswerSec=1):
         self.sendCommand(self.addressMultivalve, moveDirection + str(port), waitForAnswerSec)
-    
+
     def _pullOrDispenseAtMultivalvePort(self, pullOrDispense, port, miliLit, speed, moveDirection, waitForAnswerSec):
         self.selectMultivalvePort(port, moveDirection, waitForAnswerSec)
         volumeFraction = miliLit / self.pumpVolumeMiliLit
         speedIndex = self.speedToSecondsPerStrokeIndex(speed)
         self.sendCommand(self.addressPump, 'OS' + str(speedIndex) + 'M1000' + pullOrDispense + self.miliLitToMicroSteps(miliLit), self.strokeToSeconds['N1'][speedIndex] * volumeFraction + 2)
-        
+
     def _pullOrDispenseAtPumpInputPort(self, pullOrDispense, miliLit, speed):
         volumeFraction = miliLit / self.pumpVolumeMiliLit
         speedIndex = self.speedToSecondsPerStrokeIndex(speed)
         self.sendCommand(self.addressPump, 'IS' + str(speedIndex) + 'M1000' + pullOrDispense + self.miliLitToMicroSteps(miliLit), self.strokeToSeconds['N1'][speedIndex] * volumeFraction + 2)
-        
+
     def pullFromMultivalvePort(self, port, miliLit, speed, moveDirection='I', waitForAnswerSec=1):
         self._pullOrDispenseAtMultivalvePort('P', port, miliLit, speed, moveDirection, waitForAnswerSec)
-        
+
     def dispenseToMultivalvePort(self, port, miliLit, speed, moveDirection='I', waitForAnswerSec=1):
         self._pullOrDispenseAtMultivalvePort('D', port, miliLit, speed, moveDirection, waitForAnswerSec)
-        
+
     def pullFromPumpInputPort(self, miliLit, speed):
         self._pullOrDispenseAtPumpInputPort('P', miliLit, speed)
-        
+
     def dispenseToPumpInputPort(self, miliLit, speed):
         self._pullOrDispenseAtPumpInputPort('D', miliLit, speed)
-        
+
     def TransferFromInputToMultivalvePort(self, port, miliLit, speed, moveDirection='I', waitForAnswerSec=1):
         self.selectMultivalvePort(port, moveDirection, waitForAnswerSec)
         volumeFraction = (miliLit*2) / self.pumpVolumeMiliLit
         speedIndex = self.speedToSecondsPerStrokeIndex(speed)
-        self.sendCommand(self.addressPump, 'IS' + str(speedIndex) + 'M1000P' +self.miliLitToMicroSteps(miliLit) + 
-                             'OD' + self.miliLitToMicroSteps(miliLit), self.strokeToSeconds['N1'][speedIndex] * volumeFraction + 2)    
-        
+        self.sendCommand(self.addressPump, 'IS' + str(speedIndex) + 'M1000P' +self.miliLitToMicroSteps(miliLit) +
+                             'OD' + self.miliLitToMicroSteps(miliLit), self.strokeToSeconds['N1'][speedIndex] * volumeFraction + 2)
+
     def FirstTimeOnline(self):
         if self.useSoftSer:
             self.GetController().SoftSerConnect(self.pinRx, self.pinTx, self.serialBaudrate, self.serialPort)
         else:
             self.GetController().HardSerConnect(self.serialBaudrate, self.serialPort)
         return super(TecanSia, self).FirstTimeOnline()
-    
+
     def speedToSecondsPerStrokeIndex(self, microLitPerSec, microstepMode = 'N1'):
         miliLitPerSec = microLitPerSec / 1000
         secPerStroke = 1 / (miliLitPerSec / self.pumpVolumeMiliLit)

@@ -11,20 +11,20 @@ class MKSMassFlowController(SysCompArduino):
             controlVar = SysVarAnalogArduinoUnipolar('Flow', [0,100], pinInPercent, None, name, 'Flow percentage', '%', self.PreEditPercent, I2cDac=I2cDac)
         else:
             controlVar = SysVarAnalogArduinoUnipolar('Flow', [0,100], pinInPercent, pinOutPercent, name, 'Flow percentage', '%', self.PreEditPercent, highFreqPWM=True)
-        
-        SysCompArduino.__init__(self, name, 
+
+        SysCompArduino.__init__(self, name,
                                 (controlVar,),
                                 'monitor/change gas flow')
-        
+
         self.pinOutClose = pinOutClose
         if self.pinOutClose != None:
             self.varClose = SysVarDigitalArduino('close', pinOutClose, name)
-        
+
     def FirstTimeOnline(self):
         if self.pinOutClose != None:
             self.GetController().PinModeOut(self.varClose.pin)
         return super(MKSMassFlowController, self).FirstTimeOnline()
-        
+
     def PreEditPercent(self, value):
         if self.pinOutClose != None:
             if value == 0:

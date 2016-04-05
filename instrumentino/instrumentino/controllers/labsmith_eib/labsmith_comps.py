@@ -19,21 +19,21 @@ system components
 class LabSmithSensors4AM01(SysCompLabSmith):
     def __init__(self, name, analVars):
         SysCompLabSmith.__init__(self, name, analVars, 'sensors')
-        
+
         for var in analVars:
             var.SetManifold(self)
-            
+
     def getSensor(self, port):
         return self.GetController().GetSensorValue(port)
-    
+
 
 class LabSmithValves4VM01(SysCompLabSmith):
     def __init__(self, name, digiVars):
         SysCompLabSmith.__init__(self, name, digiVars, 'open/close valves')
-        
+
         for var in digiVars:
             var.SetController(self)
-            
+
     def setValve(self, port, state):
         if port == 1:
             self.GetController().SetValves(valve1=state)
@@ -43,7 +43,7 @@ class LabSmithValves4VM01(SysCompLabSmith):
             self.GetController().SetValves(valve3=state)
         if port == 4:
             self.GetController().SetValves(valve4=state)
-            
+
     def getValve(self, port):
         valves = self.GetController().GetValves()
         return valves[port-1]
@@ -56,26 +56,26 @@ class LabSmithSPS01SyringePump(SysCompLabSmith):
     syringeVolumeMicroLitToDiameterMiliMeter = {100: 3.256, # -80 (100 ul): .1282" (3.256 mm)
                                                 50: 2.304,  # -40 (50 ul): .0907" (2.304 mm)
                                                 20: 1.458,  # -20 (20 ul): .0574" (1.458 mm)
-                                                10: 1.031,  # -08 (10 ul): .0406" (1.031 mm) 
+                                                10: 1.031,  # -08 (10 ul): .0406" (1.031 mm)
                                                 5: 0.729}   # -04 (5 ul): .0287" (0.729 mm)
-    
+
     syringeVolumeMicroLitToFlowrateRange = {100: [1, 5600],
                                             20: [0.2, 1100],
                                             5: [0.05, 280]}
-    
+
     def __init__(self, name, volumeMicroLit, address, helpline='', defaultSpeedPercent = 50, defaultPowerPercent = 75):
         self.address = address
         self.defaultSpeedPercent = defaultSpeedPercent
         self.defaultPowerPercent = defaultPowerPercent
         self.diameterMiliMeter = self.syringeVolumeMicroLitToDiameterMiliMeter[volumeMicroLit]
-        
+
         self.volume = SysVarDigitalLabSmith_SyringeMaxVolume(name, self)
         self.plunger = SysVarDigitalLabSmith_SyringePlunger(name, self)
         self.speed = SysVarDigitalLabSmith_SyringeSpeed(name, self)
         self.flowrate = SysVarDigitalLabSmith_SyringeFlowrate(name, self, range=self.syringeVolumeMicroLitToFlowrateRange[volumeMicroLit])
         self.power = SysVarDigitalLabSmith_SyringePower(name, self)
         SysCompLabSmith.__init__(self, name, (self.volume, self.plunger, self.speed, self.flowrate, self.power), 'move syringe pump')
-        
+
     def FirstTimeOnline(self):
         maxVolume = self.GetMaxVolume()
         self.volume.SetMaxVolume(maxVolume)
@@ -103,19 +103,19 @@ class LabSmithSPS01SyringePump(SysCompLabSmith):
         eib.accessSemaphore.acquire(True)
         eib.DLL.SetSyringePower(eib.syringePumps[self.address], c_int(int(percent / 100 * LabSmithEIB.SYRINGE_PUMP_MAX_POWER)))
         eib.accessSemaphore.release()
-        
+
     def SetSyringeSpeed(self, percent):
         eib = self.GetController()
         eib.accessSemaphore.acquire(True)
         eib.DLL.SetSyringeSpeedPercent(eib.syringePumps[self.address], c_double(percent))
         eib.accessSemaphore.release()
-        
+
     def SetSyringeFlowrate(self, flowrate_uL_per_min):
         eib = self.GetController()
         eib.accessSemaphore.acquire(True)
         eib.DLL.SetSyringeFlowrate(eib.syringePumps[self.address], c_double(flowrate_uL_per_min))
         eib.accessSemaphore.release()
-        
+
     def GetMaxVolume(self):
         eib = self.GetController()
         eib.accessSemaphore.acquire(True)
@@ -132,7 +132,7 @@ class LabSmithSPS01SyringePump(SysCompLabSmith):
             if cfg.userStopped:
                 self.StopSyringe()
         thread.join()
-        
+
     def MoveSyringeToVolumePercent(self, percent, maxVolume):
         eib = self.GetController()
         thread = Thread(target=eib.DLL.MoveSyringeToVolume, args=(eib.syringePumps[self.address], c_double(percent / 100 * maxVolume)))
@@ -141,7 +141,7 @@ class LabSmithSPS01SyringePump(SysCompLabSmith):
             if cfg.userStopped:
                 self.StopSyringe()
         thread.join()
-        
+
     def MoveSyringeToVolume(self, volume):
         eib = self.GetController()
         thread = Thread(target=eib.DLL.MoveSyringeToVolume, args=(eib.syringePumps[self.address], c_double(volume)))

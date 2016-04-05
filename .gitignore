@@ -1,3 +1,4 @@
+
 .DS_Store
 
 /Release
@@ -17,25 +18,11 @@
 **/.project
 **/.settings
 
-*.pyc
-**/*.pyc
-*.mk
-**/*.mk
-
 /controlino/Release
 
-controlino/.project
-
-controlino/.project
-
 *.prefs
-
 *.d
-
 *.o
-
 *.mk
-
-controlino/.project
-
 *.pyc
+*.project

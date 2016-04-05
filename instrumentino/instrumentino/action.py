@@ -10,7 +10,7 @@ from executable_listctrl import RunnableItem
 class SysActionParam(object):
     '''
     An action's parameter
-    
+
     Sub-classes should maintain of self.maskedTextCtrl and implement:
     SetTextCtrl(parent) - Set the text controls for the parameter's value
     Get()               - Get the value from the text control
@@ -20,14 +20,14 @@ class SysActionParam(object):
         self.units = units
         self.value = value
         self.maskedTextCtrl = None
-        
+
     def onKeyPress(self, event):
         '''
         Update the parameter's value when changed in panel
         '''
         self.value = self.maskedTextCtrl.GetValue()
         event.Skip()
-        
+
     def __getstate__(self):
         '''
         Copy the object's state from self.__dict__ which contains
@@ -48,19 +48,19 @@ class SysActionParamInt(SysActionParam):
     def __init__(self, name, theRange, units='', value=0):
         SysActionParam.__init__(self, name, units, str(value))
         self.range = theRange
-        
+
     def SetTextCtrl(self, parent):
         '''
         Set the text controls for the parameter's value
         '''
-        self.maskedTextCtrl = wx.lib.masked.NumCtrl(parent, -1, self.value, 
+        self.maskedTextCtrl = wx.lib.masked.NumCtrl(parent, -1, self.value,
                                              integerWidth=cfg.numIntegerPartWidth,
                                              fractionWidth=0,
                                              min=self.range[0],
                                              max=self.range[1])
         self.maskedTextCtrl.Bind(wx.EVT_KEY_UP, self.onKeyPress)
         return self.maskedTextCtrl
-        
+
     def Get(self):
         '''
         Get the value from the text control
@@ -73,7 +73,7 @@ class SysActionParamFloat(SysActionParam):
     An action's float parameter
     '''
     def __init__(self, sysVarAnalog=None, range=[0,0], name='', units='', value=0):
-        if sysVarAnalog == None:            
+        if sysVarAnalog == None:
             theName = name
             theRange = range
             theUnits = units
@@ -81,10 +81,10 @@ class SysActionParamFloat(SysActionParam):
             theName = name if name != '' else sysVarAnalog.name
             theRange = range if range != [0,0] else sysVarAnalog.range
             theUnits = units if units != '' else sysVarAnalog.units
-        
+
         SysActionParam.__init__(self, theName, theUnits, str(value))
         self.range = theRange
-        
+
     def SetTextCtrl(self, parent):
         '''
         Set the text controls for the parameter's value
@@ -96,7 +96,7 @@ class SysActionParamFloat(SysActionParam):
                                              max=self.range[1])
         self.maskedTextCtrl.Bind(wx.EVT_KEY_UP, self.onKeyPress)
         return self.maskedTextCtrl
-        
+
     def Get(self):
         '''
         Get the value from the text control
@@ -110,7 +110,7 @@ class SysActionParamTime(SysActionParam):
     '''
     def __init__(self, name='Time', value='00:00:00.000'):
         SysActionParam.__init__(self, name, 'h:m:s.ms', value)
-        
+
     def SetTextCtrl(self, parent):
         '''
         Set the text controls for the parameter's value
@@ -121,7 +121,7 @@ class SysActionParamTime(SysActionParam):
                                                      defaultValue=str(self.value))
         self.maskedTextCtrl.Bind(wx.EVT_KEY_UP, self.onKeyPress)
         return self.maskedTextCtrl
-        
+
     def Get(self):
         '''
         Get the value from the text control
@@ -136,7 +136,7 @@ class SysActionParamTime(SysActionParam):
 class SysAction(RunnableItem):
     '''
     A runnale action
-    
+
     Sub-classes should implement:
     Command() - Run the command
     '''
@@ -145,7 +145,7 @@ class SysAction(RunnableItem):
         self.params = params
         self.paramsPanel = None
         self.commandFinished = False
-        
+
     def __repr__(self):
         '''
         Return a printed representation for the action
@@ -154,7 +154,7 @@ class SysAction(RunnableItem):
         for param in self.params:
             retVal += ' ' + param.name + '=' + str(param.value)
         return retVal
-    
+
     def SetParamsPanel(self, parent):
         '''
         Set the parameters' panel
@@ -166,9 +166,9 @@ class SysAction(RunnableItem):
             sizer.Add(wx.StaticText(paramsPanel, -1, param.name + unitsStr + ': '))
             sizer.Add(param.SetTextCtrl(paramsPanel), flag=wx.EXPAND)
         paramsPanel.SetSizer(sizer)
-        
+
         return paramsPanel
-    
+
     def Run(self, Log=True):
         '''
         Run the action
@@ -181,7 +181,7 @@ class SysAction(RunnableItem):
                     logMsg += ': '
                 else:
                     logMsg += ', '
-                logMsg += param.name + '=' + str(param.value) 
+                logMsg += param.name + '=' + str(param.value)
             cfg.LogFromOtherThread(logMsg)
 
         # Call the sub-class' command function

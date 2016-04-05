@@ -11,7 +11,7 @@ class EdaqEcorder(SysCompArduino):
     def Pause(self, value):
         if value == 'off':
             cfg.Sleep(1)
-        
+
     def TriggerPulse(self):
         self.vars['trigger'].Set('on')
         cfg.Sleep(0.01)

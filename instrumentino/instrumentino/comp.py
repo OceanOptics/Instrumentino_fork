@@ -11,7 +11,7 @@ from collections import OrderedDict
 class SysVar(object):
     '''
     A system variable
-    
+
     Sub-classes should implement:
     - Update()         -    Update the display panel and the log graph for this variable
     - GetFunc()        -    read the value of the variable from the hardware
@@ -37,27 +37,27 @@ class SysVar(object):
         if self.PostGetFunc != None:
             self.PostGetFunc(value)
         return value
-    
+
     def Set(self, value):
         '''
         Call the sub-class' SetFunc()
         '''
         if self.editable:
             if self.PreSetFunc != None:
-                self.PreSetFunc(value)                
+                self.PreSetFunc(value)
             self.SetFunc(value)
-            
+
     def Update(self):
         value = self.Get()
         self.UpdatePanel(value)
         if self.showInSignalLog:
             cfg.logGraph.AddData(self.FullName(), value)
-            
+
     def FullName(self):
         unitsStr = ' (' + self.units + ')' if hasattr(self, 'units') else ''
-        compStr = self.compName + ': ' if self.compName != '' else '' 
+        compStr = self.compName + ': ' if self.compName != '' else ''
         return compStr + self.name + unitsStr
-    
+
     def GetController(self):
         '''
         Get the working instance of the appropriate controller
@@ -67,7 +67,7 @@ class SysVar(object):
 class SysVarAnalog(SysVar):
     '''
     An analog variable (float), represented by a wx.TextCtrl on the display
-    
+
     Sub-classes should implement:
     - GetFunc()        -    read the value of the variable from the hardware
     - SetFunc(value)   -    Set the value of the variable in the hardware
@@ -78,7 +78,7 @@ class SysVarAnalog(SysVar):
         self.range = range
         self.monitorTextCtrl = None
         self.editTextCtrl = None
-        
+
     def UpdatePanel(self, value):
         '''
         Update the variable's panel with newly read data
@@ -96,7 +96,7 @@ class SysVarAnalog(SysVar):
             if self.range[0] <= value <= self.range[1]:
                 self.Set(value)
         event.Skip()
-        
+
     def CreatePanel(self, parent):
         '''
         Create a panel to represent the variable
@@ -112,7 +112,7 @@ class SysVarAnalog(SysVar):
                                               fractionWidth=cfg.numFractionPartWidth,
                                               min=self.range[0],
                                               max=self.range[1],
-                                              style=wx.TE_CENTRE | wx.TE_READONLY) 
+                                              style=wx.TE_CENTRE | wx.TE_READONLY)
         sizer.Add(self.monitorTextCtrl)
         if self.editable:
             sizer.Add(wx.StaticText(panel, label='Set to:'))
@@ -127,12 +127,12 @@ class SysVarAnalog(SysVar):
             sizer.Add(editTextCtrl)
 
         return panel
-            
+
 
 class SysVarDigital(SysVar):
     '''
     A digital variable (multiple choice), represented by a Set of wx.RadioButtons on the display
-    
+
     Sub-classes should implement:
     - GetFunc()        -    read the value of the variable from the hardware
     - SetFunc(value)   -    Set the value of the variable in the hardware
@@ -141,7 +141,7 @@ class SysVarDigital(SysVar):
         SysVar.__init__(self, name, controllerClass, compName, helpLine, editable, PreSetFunc, PostGetFunc, False)
         self.radioButtons = None
         self.states = states
-        
+
     def UpdatePanel(self, value):
         '''
         Update the variable's panel with newly read data
@@ -152,7 +152,7 @@ class SysVarDigital(SysVar):
                     rb.SetValue(rbName == value)
             except:
                 pass
-    
+
     def OnEdit(self, event):
         '''
         Set the variable's value from the user's input
@@ -176,7 +176,7 @@ class SysVarDigital(SysVar):
 
         return panel
 
-    
+
 class SysComp(object):
     '''
     A system component, which has variables, and is represented on the screen as a panel containing the variables' panels
@@ -188,17 +188,17 @@ class SysComp(object):
         self.vars = OrderedDict([(var.name, var) for var in vars])
         self.panel = None
         self.online = False
-        
+
     def CreatePanel(self, parent):
         '''
         Create a panel for the component, based on its variables
-        
+
         Sub-classes may implement FirstTimeOnline() to do some initialization when communication is established
         '''
         vars = self.vars.values()
         if len(vars) == 0:
             return None
-        
+
         self.panel = wx.Panel(parent)
         staticBox = wx.StaticBox(self.panel, label=self.name)
         sizer = wx.StaticBoxSizer(staticBox, wx.VERTICAL)
@@ -209,7 +209,7 @@ class SysComp(object):
         sizer.Add(vars[-1].CreatePanel(self.panel))
 
         return self.panel
-    
+
     def Update(self):
         '''
         Update all variables
@@ -227,14 +227,14 @@ class SysComp(object):
         Called when communication is first setup. To be implemented by subclass.
         '''
         pass
-                
+
     def Enable(self, isEnabled):
         '''
         Enable/disable the availability of the panel on the screen
         '''
         if self.panel != None:
             self.panel.Enable(isEnabled)
-            
+
     def GetController(self):
         '''
         Get the working instance of the appropriate controller

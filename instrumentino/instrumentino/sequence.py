@@ -17,14 +17,14 @@ class MethodsListCtrl(ExecutableListCtrl):
     A list of methods to be run
     '''
     def __init__(self, parent, methods=[]):
-        ExecutableListCtrl.__init__(self, parent, xrc.XRCCTRL(parent, 'methodsListPanel'), {1: 'Method', 2: 'Repeat'}, '=== run sequence ===', methods) 
+        ExecutableListCtrl.__init__(self, parent, xrc.XRCCTRL(parent, 'methodsListPanel'), {1: 'Method', 2: 'Repeat'}, '=== run sequence ===', methods)
 
     def getDefaultDataItem(self):
         '''
         Return an empty method item
         '''
         return SysMethod()
-     
+
     def getFirstColumnWidget(self, panel, listDataItem):
         '''
         Return the widget for the first column (a file dialog in this case)
@@ -38,14 +38,14 @@ class MethodsListCtrl(ExecutableListCtrl):
                                                   changeCallback=listDataItem.onPathChanged)
         filename = listDataItem.methodFileName
         if not listDataItem.checkSystemCompatibility(filename):
-            filename = ''        
+            filename = ''
         fileBrowser.SetValue(filename)
         return fileBrowser
-     
+
     def setOtherColumns(self, index, listDataItem):
         '''
         Set the other columns' content
         '''
         item = self.list.GetItem(index, self.columnNameToNum['Repeat'])
         item.SetWindow(listDataItem.setRepeatPanel(self.list), expand=True)
-        self.list.SetItem(item)        
+        self.list.SetItem(item)

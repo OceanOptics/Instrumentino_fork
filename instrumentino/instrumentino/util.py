@@ -12,11 +12,11 @@ except ImportError:
     pass
 import itertools
 
-class Chdir:    
+class Chdir:
     '''
     Instantiating this class changes the current directory until the object is deleted
-    '''     
-    def __init__( self, newPath ):  
+    '''
+    def __init__( self, newPath ):
         self.savedPath = os.getcwd()
         os.chdir(newPath)
 
@@ -39,14 +39,14 @@ class SerialUtil():
             key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, path)
         except WindowsError:
             raise IterationError
-    
+
         for i in itertools.count():
             try:
                 val = winreg.EnumValue(key, i)
                 yield str(val[1])
             except EnvironmentError:
                 break
-            
+
     def full_port_name(self, portname):
         """ Given a port-name (of the form COM7,
             COM12, CNCA0, etc.) returns a full
@@ -57,7 +57,7 @@ class SerialUtil():
         if m and int(m.group(1)) < 10:
             return portname
         return '\\\\.\\' + portname
-    
+
     def getSerialPortsList(self):
             ports = []
             if os.name == 'nt':
@@ -65,8 +65,8 @@ class SerialUtil():
                     ports.append(portname)
             elif os.name == 'posix':
                 ports = glob.glob('/dev/tty.*')
-                
+
             return ports
-        
+
 if __name__ == '__main__':
     print SerialUtil().getSerialPortsList()
