@@ -15,7 +15,8 @@ from instrumentino.sequence import MethodsListCtrl
 from instrumentino.log_graph import LogGraphPanel
 from instrumentino.action import SysAction, SysActionParamTime,\
     SysActionParamInt
-from instrumentino.controllers.arduino import Arduino, SysVarAnalogArduinoUnipolar,\
+from instrumentino.controllers.arduino import Arduino,\
+    SysVarAnalogArduinoUnipolar,\
     SysVarAnalogArduinoBipolarWithExternalPolarity, SysVarDigitalArduino
 from instrumentino.util import SerialUtil
 from instrumentino.controllers.arduino.pins import AnalogPins, DigitalPins
@@ -475,7 +476,7 @@ if __name__ == '__main__':
                              The third has a bipolar range (-5 to 5 V) while a digital pin sets the polarity.'''
             version = '1.0'
 
-            Instrument.__init__(
+            Instrument.__init__(self, comps, actions, version, name, description)
 
     '''
     *** Run program
