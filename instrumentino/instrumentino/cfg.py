@@ -51,8 +51,8 @@ def InitVariables(arguApp):
     mainFrame = arguApp.mainFrame
 
     global logTextCtrl
-    logTextCtrl = wx.xrc.XRCCTRL(arguApp.mainFrame, 'logTextCtrl')
-    logTextCtrl.SetEditable(False)
+    # logTextCtrl = wx.xrc.XRCCTRL(arguApp.mainFrame, 'logTextCtrl')
+    # logTextCtrl.SetEditable(False)
 
     global logGraph
     logGraph = arguApp.logGraph
@@ -61,7 +61,7 @@ def InitVariables(arguApp):
     timeNow = datetime.now().strftime('%Y_%m_%d-%H_%M_%S')
 
     global commandsLogFile
-    commandsLogFile = open(LogPath(timeNow + '.txt'), 'w')
+    #commandsLogFile = open(LogPath(timeNow + '.txt'), 'w')
 
     global signalsLogFile
     signalsLogFile = open(LogPath(timeNow + '.csv'), 'w')
@@ -134,6 +134,7 @@ def ResourcePath(relativePath=''):
     #         except Exception:
     #             basePath = os.path.dirname(resource_filename('instrumentino.resources', 'main.xrc'))
     basePath = os.path.dirname(resource_filename('instrumentino.resources', 'main.xrc'))
+    print os.path.join(basePath, relativePath)
     return os.path.join(basePath, relativePath)
 
 def GetOrCreateDirectory(name):

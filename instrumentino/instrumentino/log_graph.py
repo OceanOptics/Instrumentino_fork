@@ -61,7 +61,7 @@ class LogGraphPanel(wx.Panel):
         self.toolbar = NavigationToolbar(self.canvas)
 
         self.axes.set_xlabel('time', fontsize=12)
-        self.axes.set_ylabel('percent (%) - dashed line for negative values', fontsize=12)
+        self.axes.set_ylabel('signal (%) dashed line for negative values', fontsize=12)
         self.axes.set_ybound(0,100)
         self.axes.xaxis_date()
         self.axes.get_xaxis().set_ticks([])

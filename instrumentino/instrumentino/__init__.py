@@ -10,15 +10,15 @@ import pickle
 import os
 from datetime import datetime
 from instrumentino import cfg
-from instrumentino.method import ActionsListCtrl
-from instrumentino.sequence import MethodsListCtrl
+# from instrumentino.method import ActionsListCtrl
+# from instrumentino.sequence import MethodsListCtrl
 from instrumentino.log_graph import LogGraphPanel
-from instrumentino.action import SysAction, SysActionParamTime,\
-    SysActionParamInt
+# from instrumentino.action import SysAction, SysActionParamTime,\
+#     SysActionParamInt
 from instrumentino.controllers.arduino import Arduino,\
     SysVarAnalogArduinoUnipolar,\
     SysVarAnalogArduinoBipolarWithExternalPolarity, SysVarDigitalArduino
-from instrumentino.util import SerialUtil
+# from instrumentino.util import SerialUtil
 from instrumentino.controllers.arduino.pins import AnalogPins, DigitalPins
 
 
@@ -39,7 +39,7 @@ class InstrumentinoApp(wx.App):
         '''
         Load the main window from the main.xrc
         '''
-        self.mainXrc = wx.xrc.XmlResource(cfg.ResourcePath('main.xrc'))
+        self.mainXrc = wx.xrc.XmlResource(cfg.ResourcePath('mainSignalsOnly.xrc'))
         self.InitFrame()
         return True
 
@@ -63,14 +63,14 @@ class InstrumentinoApp(wx.App):
         cfg.InitVariables(self)
 
         # Menu
-        self.mainFrame.Bind(
-            wx.EVT_MENU, self.OnLoadSequence, id=wx.xrc.XRCID('loadSequenceMenuItem'))
-        self.mainFrame.Bind(
-            wx.EVT_MENU, self.OnSaveSequence, id=wx.xrc.XRCID('saveSequenceMenuItem'))
-        self.mainFrame.Bind(
-            wx.EVT_MENU, self.OnLoadMethod, id=wx.xrc.XRCID('loadMethodMenuItem'))
-        self.mainFrame.Bind(
-            wx.EVT_MENU, self.OnSaveMethod, id=wx.xrc.XRCID('saveMethodMenuItem'))
+        # self.mainFrame.Bind(
+        #     wx.EVT_MENU, self.OnLoadSequence, id=wx.xrc.XRCID('loadSequenceMenuItem'))
+        # self.mainFrame.Bind(
+        #     wx.EVT_MENU, self.OnSaveSequence, id=wx.xrc.XRCID('saveSequenceMenuItem'))
+        # self.mainFrame.Bind(
+        #     wx.EVT_MENU, self.OnLoadMethod, id=wx.xrc.XRCID('loadMethodMenuItem'))
+        # self.mainFrame.Bind(
+        #     wx.EVT_MENU, self.OnSaveMethod, id=wx.xrc.XRCID('saveMethodMenuItem'))
         self.mainFrame.Bind(
             wx.EVT_MENU, self.OnClose, id=wx.xrc.XRCID('quitMenuItem'))
         self.mainFrame.Bind(
@@ -87,53 +87,52 @@ class InstrumentinoApp(wx.App):
                                    'Connect the ' + controller.name)
             self.mainFrame.Bind(wx.EVT_MENU, controller.OnMenuConnect, menu)
 
-        # sysCompsPanel
+        # sysCompsPanel (display analog and digital values)
         monitorPanel = wx.xrc.XRCCTRL(self.mainFrame, 'monitorPanel')
-        self.stopButton = wx.BitmapButton(
-            monitorPanel, -1, wx.Bitmap(cfg.ResourcePath('stopButton.png'), wx.BITMAP_TYPE_PNG))
-        monitorPanel.GetSizer().Add(
-            self.stopButton, flag=wx.BOTTOM | wx.ALIGN_CENTRE_HORIZONTAL)
-        self.stopButton.Bind(wx.EVT_BUTTON, self.OnStopButton)
-
+        # Stop button
+        # self.stopButton = wx.BitmapButton(
+        #     monitorPanel, -1, wx.Bitmap(cfg.ResourcePath('stopButton.png'), wx.BITMAP_TYPE_PNG))
+        # monitorPanel.GetSizer().Add(
+        #     self.stopButton, flag=wx.BOTTOM | wx.ALIGN_CENTRE_HORIZONTAL)
+        # self.stopButton.Bind(wx.EVT_BUTTON, self.OnStopButton)
         self.sysCompsPanel = wx.xrc.XRCCTRL(self.mainFrame, 'sysCompsPanel')
         sysCompsPanelBoxSizer = self.sysCompsPanel.GetSizer()
         for sysComp in self.sysComps:
             panel = sysComp.CreatePanel(self.sysCompsPanel)
             if panel != None:
                 sysCompsPanelBoxSizer.Add(panel)
-
         # make all sysComps fill their given area
         for sysCompPanel in sysCompsPanelBoxSizer.GetChildren():
             sysCompPanel.SetFlag(wx.GROW)
         sysCompsPanelBoxSizer.Fit(self.mainFrame)
 
-        self.Connect(-1, -1, cfg.EVT_UPDATE_CONTROLS, self.OnUpdateControls)
-        self.Connect(-1, -1, cfg.EVT_POP_MESSAGE, self.OnPopMessage)
+        # self.Connect(-1, -1, cfg.EVT_UPDATE_CONTROLS, self.OnUpdateControls)
+        # self.Connect(-1, -1, cfg.EVT_POP_MESSAGE, self.OnPopMessage)
 
         # Method
-        self.actionsListCtrl = ActionsListCtrl(
-            wx.xrc.XRCCTRL(self.mainFrame, 'methodPage'), self.sysActions)
-        self.runButtons.append(self.actionsListCtrl.runButton)
-        self.listButtons.extend(
-            [self.actionsListCtrl.list, self.actionsListCtrl.addButton, self.actionsListCtrl.removeButton])
+        # self.actionsListCtrl = ActionsListCtrl(
+        #     wx.xrc.XRCCTRL(self.mainFrame, 'methodPage'), self.sysActions)
+        # self.runButtons.append(self.actionsListCtrl.runButton)
+        # self.listButtons.extend(
+        #     [self.actionsListCtrl.list, self.actionsListCtrl.addButton, self.actionsListCtrl.removeButton])
 
         # Sequence
-        self.methodsListCtrl = MethodsListCtrl(
-            wx.xrc.XRCCTRL(self.mainFrame, 'sequencePage'))
-        self.runButtons.append(self.methodsListCtrl.runButton)
-        self.listButtons.extend(
-            [self.methodsListCtrl.list, self.methodsListCtrl.addButton, self.methodsListCtrl.removeButton])
+        # self.methodsListCtrl = MethodsListCtrl(
+        #     wx.xrc.XRCCTRL(self.mainFrame, 'sequencePage'))
+        # self.runButtons.append(self.methodsListCtrl.runButton)
+        # self.listButtons.extend(
+        #     [self.methodsListCtrl.list, self.methodsListCtrl.addButton, self.methodsListCtrl.removeButton])
 
         # This makes sure both pages are drawn
-        notebook = wx.xrc.XRCCTRL(self.mainFrame, 'methodsAndSequences')
-        notebook.SendPageChangedEvent(0, 1)
-        self.mainFrame.GetSizer().Fit(self.mainFrame)
-        notebook.SendPageChangedEvent(1, 0)
+        # notebook = wx.xrc.XRCCTRL(self.mainFrame, 'methodsAndSequences')
+        # notebook.SendPageChangedEvent(0, 1)
+        # self.mainFrame.GetSizer().Fit(self.mainFrame)
+        # notebook.SendPageChangedEvent(1, 0)
 
         # main frame
         self.splitter.SetSashPosition(400, True)
         self.mainFrame.GetSizer().Fit(self.mainFrame)
-        self.UpdateControls()
+        # self.UpdateControls()
         self.mainFrame.Show()
 
         # Monitor periodically
@@ -154,138 +153,139 @@ class InstrumentinoApp(wx.App):
             dlg.ShowModal()
             dlg.Destroy()
 
-    def OnUpdateControls(self, event):
-        '''
-        Update the system components' availability
-        '''
-        self.UpdateControls(event.data)
+    # def OnUpdateControls(self, event):
+    #     '''
+    #     Update the system components' availability
+    #     '''
+    #     self.UpdateControls(event.data)
 
-    def OnPopMessage(self, event):
-        '''
-        Pop a message window to the user
-        '''
-        (text, e, waitForUser) = event.data
-        wx.Bell()
-        if waitForUser:
-            dlg = wx.MessageDialog(self.mainFrame,
-                                   text + '\nResume operation?',
-                                   'Waiting for user', wx.OK | wx.ICON_QUESTION)
-        else:
-            dlg = wx.MessageDialog(self.mainFrame,
-                                   text,
-                                   'Notification', wx.OK | wx.ICON_QUESTION)
-        dlg.ShowModal()
-        dlg.Destroy()
-        e.set()
+    # def OnPopMessage(self, event):
+    #     '''
+    #     Pop a message window to the user
+    #     '''
+    #     (text, e, waitForUser) = event.data
+    #     wx.Bell()
+    #     if waitForUser:
+    #         dlg = wx.MessageDialog(self.mainFrame,
+    #                                text + '\nResume operation?',
+    #                                'Waiting for user', wx.OK | wx.ICON_QUESTION)
+    #     else:
+    #         dlg = wx.MessageDialog(self.mainFrame,
+    #                                text,
+    #                                'Notification', wx.OK | wx.ICON_QUESTION)
+    #     dlg.ShowModal()
+    #     dlg.Destroy()
+    #     e.set()
 
-    def UpdateControls(self, runningOperation=False):
-        '''
-        Update the system components frame with actual values
-        '''
-        for comp in self.sysComps:
-            comp.Enable(cfg.IsCompOnline(comp))
+    # def UpdateControls(self, runningOperation=False):
+    #     '''
+    #     Update the system components frame with actual values
+    #     '''
+    #     for comp in self.sysComps:
+    #         comp.Enable(cfg.IsCompOnline(comp))
 
-        for button in self.listButtons:
-            button.Enable(not runningOperation)
+    #     for button in self.listButtons:
+    #         button.Enable(not runningOperation)
 
-        for button in self.runButtons:
-            button.Enable(cfg.AllOnline() and not runningOperation)
+    #     for button in self.runButtons:
+    #         button.Enable(cfg.AllOnline() and not runningOperation)
 
-        self.stopButton.Enable(cfg.AllOnline() and runningOperation)
+    #     self.stopButton.Enable(cfg.AllOnline() and runningOperation)
 
-        cfg.logTextCtrl.Enable(cfg.AllOnline())
-        cfg.logGraph.Enable(cfg.AllOnline())
+    #     cfg.logTextCtrl.Enable(cfg.AllOnline())
+    #     cfg.logGraph.Enable(cfg.AllOnline())
 
-    def OnLoadSequence(self, event):
-        '''
-        Load a sequence file
-        '''
-        self.loadFile(
-            event, "Choose a sequence file", cfg.sequenceWildcard, self.methodsListCtrl)
+    # def OnLoadSequence(self, event):
+    #     '''
+    #     Load a sequence file
+    #     '''
+    #     self.loadFile(
+    #         event, "Choose a sequence file", cfg.sequenceWildcard, self.methodsListCtrl)
 
-    def OnSaveSequence(self, event):
-        '''
-        Save a sequence file
-        '''
-        self.saveFile(event, "Save sequence as ...",
-                      cfg.sequenceWildcard, '.seq', self.methodsListCtrl)
+    # def OnSaveSequence(self, event):
+    #     '''
+    #     Save a sequence file
+    #     '''
+    #     self.saveFile(event, "Save sequence as ...",
+    #                   cfg.sequenceWildcard, '.seq', self.methodsListCtrl)
 
-    def OnLoadMethod(self, event):
-        '''
-        Load a method file
-        '''
-        self.loadFile(
-            event, "Choose a method file", cfg.methodWildcard, self.actionsListCtrl)
+    # def OnLoadMethod(self, event):
+    #     '''
+    #     Load a method file
+    #     '''
+    #     self.loadFile(
+    #         event, "Choose a method file", cfg.methodWildcard, self.actionsListCtrl)
 
-    def OnSaveMethod(self, event):
-        '''
-        Save a method file
-        '''
-        self.saveFile(
-            event, "Save method as ...", cfg.methodWildcard, '.mtd', self.actionsListCtrl)
+    # def OnSaveMethod(self, event):
+    #     '''
+    #     Save a method file
+    #     '''
+    #     self.saveFile(
+    #         event, "Save method as ...", cfg.methodWildcard, '.mtd', self.actionsListCtrl)
 
-    def loadFile(self, event, message, wildcard, listCtrl):
-        '''
-        File loading helper function
-        '''
-        dlg = wx.FileDialog(self.mainFrame, message=message, defaultDir=cfg.UserFilesPath(),
-                            defaultFile="", wildcard=wildcard,
-                            style=wx.OPEN | wx.CHANGE_DIR)
+    # def loadFile(self, event, message, wildcard, listCtrl):
+    #     '''
+    #     File loading helper function
+    #     '''
+    #     dlg = wx.FileDialog(self.mainFrame, message=message, defaultDir=cfg.UserFilesPath(),
+    #                         defaultFile="", wildcard=wildcard,
+    #                         style=wx.OPEN | wx.CHANGE_DIR)
 
-        if dlg.ShowModal() == wx.ID_OK:
-            try:
-                filePath = dlg.GetPaths()[0]
-                with open(filePath, 'r') as fp:
-                    dlg.Destroy()
-                    savedFile = pickle.load(fp)
-                    if savedFile.systemUid == self.system.GetSystemUid():
-                        listCtrl.populateList(savedFile.list)
-                        cfg.LogFromOtherThread('File loaded: ' + filePath)
-                    else:
-                        errDlg = wx.MessageDialog(self.mainFrame, 'File incompatible with this system',
-                                                  'Error',
-                                                  wx.OK | wx.ICON_ERROR)
-                        errDlg.ShowModal()
-                        errDlg.Destroy()
+    #     if dlg.ShowModal() == wx.ID_OK:
+    #         try:
+    #             filePath = dlg.GetPaths()[0]
+    #             with open(filePath, 'r') as fp:
+    #                 dlg.Destroy()
+    #                 savedFile = pickle.load(fp)
+    #                 if savedFile.systemUid == self.system.GetSystemUid():
+    #                     listCtrl.populateList(savedFile.list)
+    #                     cfg.LogFromOtherThread('File loaded: ' + filePath)
+    #                 else:
+    #                     errDlg = wx.MessageDialog(self.mainFrame, 'File incompatible with this system',
+    #                                               'Error',
+    #                                               wx.OK | wx.ICON_ERROR)
+    #                     errDlg.ShowModal()
+    #                     errDlg.Destroy()
 
-            except (IOError, EOFError):
-                errDlg = wx.MessageDialog(self.mainFrame, 'Error loading the file',
-                                          'Error',
-                                          wx.OK | wx.ICON_ERROR)
-                errDlg.ShowModal()
-                errDlg.Destroy()
+    #         except (IOError, EOFError):
+    #             errDlg = wx.MessageDialog(self.mainFrame, 'Error loading the file',
+    #                                       'Error',
+    #                                       wx.OK | wx.ICON_ERROR)
+    #             errDlg.ShowModal()
+    #             errDlg.Destroy()
 
-    def saveFile(self, event, message, wildcard, extension, listCtrl):
-        '''
-        File saving helper function
-        '''
-        dlg = wx.FileDialog(self.mainFrame, message=message, defaultDir=cfg.UserFilesPath(),
-                            defaultFile="", wildcard=wildcard, style=wx.SAVE)
+    # def saveFile(self, event, message, wildcard, extension, listCtrl):
+    #     '''
+    #     File saving helper function
+    #     '''
+    #     dlg = wx.FileDialog(self.mainFrame, message=message, defaultDir=cfg.UserFilesPath(),
+    #                         defaultFile="", wildcard=wildcard, style=wx.SAVE)
 
-        if dlg.ShowModal() == wx.ID_OK:
-            try:
-                path = dlg.GetPath()
-                name = os.path.splitext(path)[0]
-                with open(name + extension, 'w') as fp:
-                    pickle.dump(
-                        SavedFile(self.system.GetSystemUid(), listCtrl.getDataItemsList()), fp)
-                    cfg.LogFromOtherThread('File saved: ' + path)
-                    fp.close()
-            except (IOError, EOFError):
-                errDlg = wx.MessageDialog(self.mainFrame, 'Error saving the file',
-                                          'Error',
-                                          wx.OK | wx.ICON_ERROR)
-                errDlg.ShowModal()
-                errDlg.Destroy()
+    #     if dlg.ShowModal() == wx.ID_OK:
+    #         try:
+    #             path = dlg.GetPath()
+    #             name = os.path.splitext(path)[0]
+    #             with open(name + extension, 'w') as fp:
+    #                 pickle.dump(
+    #                     SavedFile(self.system.GetSystemUid(), listCtrl.getDataItemsList()), fp)
+    #                 cfg.LogFromOtherThread('File saved: ' + path)
+    #                 fp.close()
+    #         except (IOError, EOFError):
+    #             errDlg = wx.MessageDialog(self.mainFrame, 'Error saving the file',
+    #                                       'Error',
+    #                                       wx.OK | wx.ICON_ERROR)
+    #             errDlg.ShowModal()
+    #             errDlg.Destroy()
 
-        dlg.Destroy()
+    #     dlg.Destroy()
 
     def OnClose(self, event):
         '''
         Close the application
         '''
         dlg = wx.MessageDialog(self.mainFrame,
-                               "Do you really want to Close this application?",
+                               "Do you really want to close?\n" +
+                               "Data is saved automatically. ahah",
                                "Confirm Exit", wx.OK | wx.CANCEL | wx.ICON_QUESTION)
         result = dlg.ShowModal()
         dlg.Destroy()
@@ -304,33 +304,35 @@ class InstrumentinoApp(wx.App):
 
             self.mainFrame.Destroy()
 
-    def OnComm(self, controllerName, connectionSetupFunc):
-        '''
-        Communication setup helper function
-        '''
-        dlg = wx.SingleChoiceDialog(
-            self.mainFrame, 'Select the serial port', 'Connect ' +
-            controllerName,
-            SerialUtil().getSerialPortsList(),
-            wx.CHOICEDLG_STYLE
-        )
+    # def OnComm(self, controllerName, connectionSetupFunc):
+    #     '''
+    #     Communication setup helper function
+    #     '''
+    #     dlg = wx.SingleChoiceDialog(
+    #         self.mainFrame, 'Select the serial port',
+    #         'Connect ' + controllerName,
+    #         SerialUtil().getSerialPortsList(),
+    #         wx.CHOICEDLG_STYLE
+    #     )
+    #     dlg.SetSelection(1) # Set selection to last item in list
+    #     if dlg.ShowModal() == wx.ID_OK:
+    #         print dlg.GetSelection()
+    #         print dlg.GetStringSelection()
+    #         connectionSetupFunc(dlg.GetStringSelection())
 
-        if dlg.ShowModal() == wx.ID_OK:
-            connectionSetupFunc(dlg.GetStringSelection())
+    #     dlg.Destroy()
 
-        dlg.Destroy()
-
-    def OnStopButton(self, evt):
-        '''
-        Respond to stop button being pressed
-        '''
-        cfg.userStopped = True
-        dlg = wx.MessageDialog(self.mainFrame, 'Operation stopped!',
-                               'Notification',
-                               wx.OK | wx.ICON_INFORMATION
-                               )
-        result = dlg.ShowModal()
-        dlg.Destroy()
+    # def OnStopButton(self, evt):
+    #     '''
+    #     Respond to stop button being pressed
+    #     '''
+    #     cfg.userStopped = True
+    #     dlg = wx.MessageDialog(self.mainFrame, 'Operation stopped!',
+    #                            'Notification',
+    #                            wx.OK | wx.ICON_INFORMATION
+    #                            )
+    #     result = dlg.ShowModal()
+    #     dlg.Destroy()
 
     def OnAbout(self, evt):
         '''
@@ -371,7 +373,6 @@ class SavedFile(object):
     '''
     Describe a system dependent saved file
     '''
-
     def __init__(self, systemUid, list):
         self.systemUid = systemUid
         self.list = list
@@ -395,7 +396,8 @@ class Instrument():
         '''
         Return a unique id for the instrument
         '''
-        return self.name + self.version + self.description
+        #return self.name + self.version + self.description
+        return self.name + '_' + self.version
 
     def StartApp(self):
         '''
@@ -444,21 +446,21 @@ if __name__ == '__main__':
     '''
     *** System actions
     '''
-    class SysActionSetPolarity(SysAction):
-        def __init__(self):
-            self.polarity = SysActionParamInt('Polarity', [-1, 1])
-            SysAction.__init__(self, 'Set polarity', (self.polarity,))
+    # class SysActionSetPolarity(SysAction):
+    #     def __init__(self):
+    #         self.polarity = SysActionParamInt('Polarity', [-1, 1])
+    #         SysAction.__init__(self, 'Set polarity', (self.polarity,))
 
-        def Command(self):
-            polarityVariable.Set('on' if self.polarity.Get() > 0 else 'off')
+    #     def Command(self):
+    #         polarityVariable.Set('on' if self.polarity.Get() > 0 else 'off')
 
-    class SysActionSleep(SysAction):
-        def __init__(self):
-            self.seconds = SysActionParamTime(name='Time')
-            SysAction.__init__(self, 'Sleep', (self.seconds,))
+    # class SysActionSleep(SysAction):
+    #     def __init__(self):
+    #         self.seconds = SysActionParamTime(name='Time')
+    #         SysAction.__init__(self, 'Sleep', (self.seconds,))
 
-        def Command(self):
-            cfg.Sleep(self.seconds.Get())
+    #     def Command(self):
+    #         cfg.Sleep(self.seconds.Get())
 
     '''
     *** System
@@ -466,10 +468,11 @@ if __name__ == '__main__':
     class System(Instrument):
         def __init__(self):
             comps = (analPins, digiPins)
-            actions = (SysActionSetPolarity(),
-                       SysActionSleep())
+            # actions = (SysActionSetPolarity(),
+            #            SysActionSleep())
+            actions = ()
             name = 'Basic Arduino example'
-            description = '''Basic Arduino example.\n 
+            description = '''Basic Arduino example.\n
                              Use an Arduino to track the values of two analog pins.\n
                              The first has a unipolar positive range (0 to 5 V).\n
                              The second has a unipolar negative range (-5 to 0 V).\n

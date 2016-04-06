@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resource>
+  <object class="wxFrame" name="mainFrame">
+    <object class="wxBoxSizer">
+      <orient>wxHORIZONTAL</orient>
+      <object class="sizeritem">
+        <object class="wxPanel" name="monitorPanel">
+          <object class="wxBoxSizer">
+            <orient>wxVERTICAL</orient>
+            <object class="sizeritem">
+              <object class="wxPanel" name="sysCompsPanel">
+                <object class="wxBoxSizer">
+                  <orient>wxVERTICAL</orient>
+                </object>
+              </object>
+              <flag>wxTOP|wxEXPAND|wxGROW</flag>
+              <ratio>1</ratio>
+            </object>
+          </object>
+        </object>
+        <flag>wxALL|wxEXPAND|wxGROW</flag>
+      </object>
+      <object class="sizeritem">
+        <object class="wxSplitterWindow" name="splitter">
+          <object class="wxPanel" name="logPanel">
+            <object class="wxBoxSizer">
+              <orient>wxVERTICAL</orient>
+              <object class="sizeritem">
+                    <object class="wxPanel" name="logGraphPage">
+                      <object class="wxBoxSizer">
+                        <orient>wxVERTICAL</orient>
+                      </object>
+                    </object>
+                    <option>1</option>
+                <flag>wxALL|wxEXPAND|wxGROW</flag>
+              </object>
+            </object>
+          </object>
+          <orientation>vertical</orientation>
+          <sashpos>0</sashpos>
+          <minsize>1</minsize>
+          <style>wxSP_LIVE_UPDATE</style>
+        </object>
+        <option>1</option>
+        <flag>wxEXPAND|wxGROW</flag>
+      </object>
+    </object>
+    <object class="wxMenuBar" name="mainMenuBar">
+      <object class="wxMenu" name="commMenu">
+        <label>Comm</label>
+        <help>Connect to devices</help>
+      </object>
+      <object class="wxMenu" name="helpMenu">
+        <label>Help</label>
+        <object class="wxMenuItem" name="aboutMenuItem">
+          <label>About</label>
+          <help>About</help>
+        </object>
+        <help>Help</help>
+      </object>
+      <style/>
+    </object>
+    <object class="wxStatusBar" name="statusBar"/>
+    <title/>
+  </object>
+</resource>
