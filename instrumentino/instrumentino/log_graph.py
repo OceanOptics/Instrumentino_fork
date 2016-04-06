@@ -1,6 +1,6 @@
 from __future__ import division
 __author__ = 'yoelk'
-from datetime import datetime
+from datetime import datetime, timedelta
 import wx
 from wx import xrc
 from instrumentino.comp import SysVarAnalog, SysVarDigital
@@ -44,7 +44,10 @@ class LogGraphPanel(wx.Panel):
         wx.Panel.__init__(self, parent)
         self.parent = parent
         self.sysComps = sysComps
-        self.dataWriteBulk = 10
+        self.dataWriteBulk = 240  # Frequency at which update log file (~1min)
+        self.logFileLength = 2  # Minutes before creating a new log file
+                                   #    if > 1440 then feature is disable
+        self.logPosition = 0    # Position of last data written
 
         # add controls
         self.cb_freeze = wx.CheckBox(self, -1, "Freeze")
@@ -187,6 +190,7 @@ class LogGraphPanel(wx.Panel):
     def AddData(self, name, value):
         # keep all data arrays the same length. the time array should be updated last
         if len(self.allRealData[name].data) <= len(self.time):
+            # Set value to previous value if NaN
             if value == None:
                 value = self.allRealData[name].data[-1] if len(self.allRealData[name].data) > 0 else 0
 
@@ -204,14 +208,24 @@ class LogGraphPanel(wx.Panel):
     def FinishUpdate(self):
         self.time += [datetime.now()]
 
-        # write a header with variable names
-        if len(self.time) == 1:
+        # create new file if first call, switch day, or maximum time for file
+        if (cfg.signalsLogFile == None or
+            cfg.timeCurrentSignalsLogFile.day != self.time[-1].day or
+            self.time[-1] - cfg.timeCurrentSignalsLogFile >= timedelta(minutes=self.logFileLength)):
+            # close previous file (if there is one)
+            if cfg.signalsLogFile != None:
+                cfg.signalsLogFile.close()
+            # open new file
+            filename = self.time[-1].strftime('%Y_%m_%d-%H_%M_%S') + '.csv'
+            cfg.signalsLogFile = open(cfg.LogPath(filename), 'w')
+            print "Writing data in {}".format(filename)
+            cfg.timeCurrentSignalsLogFile = self.time[-1]
+            # write a header with variable names
             cfg.signalsLogFile.write('time,' + str(self.allRealData.keys())[1:-1] + '\r')
 
         # update the signals' file once in a while
         if len(self.time) % self.dataWriteBulk == 0:
-            for idx in range(-1*self.dataWriteBulk,0):
-                cfg.signalsLogFile.write(str(self.time[idx].strftime('%H:%M:%S.%f')) + ',' + str([v.data[idx] for v in self.allRealData.values()])[1:-1] + '\r')
+            self.WriteDataInLog(range(-1*self.dataWriteBulk,0))
 
         # only show the graph when there's at least 2 data points
         if len(self.time) < 2:
@@ -219,10 +233,13 @@ class LogGraphPanel(wx.Panel):
         self.Redraw(len(self.time) == 2)
 
     def StopUpdates(self):
-        for idx in range(-1*(len(self.time) % self.dataWriteBulk),0):
+        self.WriteDataInLog(range(-1*(len(self.time) % self.dataWriteBulk),0))
+        plt.close()
+
+    def WriteDataInLog(self, _range):
+        for idx in _range:
             cfg.signalsLogFile.write(str(self.time[idx].strftime('%H:%M:%S.%f')) + ',' + str([v.data[idx] for v in self.allRealData.values()])[1:-1] + '\r')
 
-        plt.close()
 
     def Redraw(self, firstTime=False):
         """ Redraws the figure

@@ -34,6 +34,7 @@ mainFrame = None
 logTextCtrl = None
 logGraph = None
 commandsLogFile = None
+timeCurrentSignalsLogFile = None
 signalsLogFile = None
 systemUid = None
 
@@ -50,21 +51,23 @@ def InitVariables(arguApp):
     global mainFrame
     mainFrame = arguApp.mainFrame
 
-    global logTextCtrl
+    #global logTextCtrl
     # logTextCtrl = wx.xrc.XRCCTRL(arguApp.mainFrame, 'logTextCtrl')
     # logTextCtrl.SetEditable(False)
 
     global logGraph
     logGraph = arguApp.logGraph
 
-    global timeNow
+    #global timeNow
     timeNow = datetime.now().strftime('%Y_%m_%d-%H_%M_%S')
 
-    global commandsLogFile
+    #global commandsLogFile
     #commandsLogFile = open(LogPath(timeNow + '.txt'), 'w')
 
     global signalsLogFile
-    signalsLogFile = open(LogPath(timeNow + '.csv'), 'w')
+    #signalsLogFile = open(LogPath(timeNow + '.csv'), 'w')
+    global timeCurrentSignalsLogFile
+    timeCurrentSignalsLogFile = datetime.now()
 
     global systemUid
     systemUid = arguApp.system.GetSystemUid()
