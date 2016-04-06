@@ -214,26 +214,29 @@ class LogGraphPanel(wx.Panel):
             self.time[-1] - cfg.timeCurrentSignalsLogFile >= timedelta(minutes=self.logFileLength)):
             # close previous file (if there is one)
             if cfg.signalsLogFile != None:
+                if len(self.time) > 2:
+                    self.WriteDataInLog(range(self.logPosition,len(self.time)-1))
+                    self.logPosition = len(self.time)-1
                 cfg.signalsLogFile.close()
             # open new file
-            filename = self.time[-1].strftime('%Y_%m_%d-%H_%M_%S') + '.csv'
+            filename = self.time[-1].strftime('%Y%m%d-%H%M%S') + '.csv'
             cfg.signalsLogFile = open(cfg.LogPath(filename), 'w')
             print "Writing data in {}".format(filename)
             cfg.timeCurrentSignalsLogFile = self.time[-1]
             # write a header with variable names
             cfg.signalsLogFile.write('time,' + str(self.allRealData.keys())[1:-1] + '\r')
-
-        # update the signals' file once in a while
-        if len(self.time) % self.dataWriteBulk == 0:
-            self.WriteDataInLog(range(-1*self.dataWriteBulk,0))
+        else:
+            # update the signals' file once in a while
+            if len(self.time) - self.dataWriteBulk == self.logPosition:
+                self.WriteDataInLog(range(-1*self.dataWriteBulk,0))
+                self.logPosition = len(self.time)
 
         # only show the graph when there's at least 2 data points
-        if len(self.time) < 2:
-            return
-        self.Redraw(len(self.time) == 2)
+        if len(self.time) >= 2:
+            self.Redraw(len(self.time) == 2)
 
     def StopUpdates(self):
-        self.WriteDataInLog(range(-1*(len(self.time) % self.dataWriteBulk),0))
+        self.WriteDataInLog(range(self.logPosition,len(self.time)))
         plt.close()
 
     def WriteDataInLog(self, _range):

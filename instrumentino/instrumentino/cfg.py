@@ -137,7 +137,6 @@ def ResourcePath(relativePath=''):
     #         except Exception:
     #             basePath = os.path.dirname(resource_filename('instrumentino.resources', 'main.xrc'))
     basePath = os.path.dirname(resource_filename('instrumentino.resources', 'main.xrc'))
-    print os.path.join(basePath, relativePath)
     return os.path.join(basePath, relativePath)
 
 def GetOrCreateDirectory(name):
