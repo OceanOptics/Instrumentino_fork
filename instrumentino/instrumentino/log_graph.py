@@ -57,14 +57,20 @@ class LogGraphPanel(wx.Panel):
         self.slider_zoom.SetTickFreq(10, 1)
         self.Bind(wx.EVT_COMMAND_SCROLL_THUMBTRACK, self.on_slider_width, self.slider_zoom)
 
+        # Get DPI of screen (Retina Screen not supported)
+        screenSizeMMw, screenSizeMMh = wx.ScreenDC().GetSizeMM()
+        screenSizePixw, screenSizePixh = wx.ScreenDC().GetSize()
+        self.dpi = int(((screenSizePixw / screenSizeMMw) +
+                        (screenSizePixh / screenSizeMMh)) / 2 * 25.4)
+        if not (60 < self.dpi < 300):
+            self.dpi = 100  # Setting DPI
         # set figure
-        self.dpi = 100
         self.figure, self.axes = plt.subplots()
         self.canvas = FigureCanvas(self, -1, self.figure)
         self.toolbar = NavigationToolbar(self.canvas)
 
-        self.axes.set_xlabel('time', fontsize=12)
-        self.axes.set_ylabel('signal (%) dashed line for negative values', fontsize=12)
+        self.axes.set_xlabel('Time (min)', fontsize=12)
+        self.axes.set_ylabel('Signal (%)', fontsize=12)
         self.axes.set_ybound(0,100)
         self.axes.xaxis_date()
         self.axes.get_xaxis().set_ticks([])
