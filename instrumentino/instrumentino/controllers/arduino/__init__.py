@@ -101,6 +101,10 @@ class Arduino(InstrumentinoController):
 
         valuesStr = self._sendData('Read %s'%(pins.strip()))
         if valuesStr == None:
+            # Error while sending data to Arduino
+            # Update cache with None
+            for key in keys:
+                self.pinValuesCache[key] = None
             return
 
         values = valuesStr.split(' ')

@@ -11,7 +11,7 @@ import matplotlib
 matplotlib.use('WXAgg')
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
-from matplotlib.backends.backend_wx import NavigationToolbar2Wx
+#from matplotlib.backends.backend_wx import NavigationToolbar2Wx
 from matplotlib.backends.backend_wxagg import NavigationToolbar2WxAgg as NavigationToolbar
 from matplotlib import pyplot as plt
 from matplotlib.dates import DateFormatter, MinuteLocator, SecondLocator,\
@@ -45,15 +45,17 @@ class LogGraphPanel(wx.Panel):
         self.parent = parent
         self.sysComps = sysComps
         self.dataWriteBulk = 240  # Frequency at which update log file (~1min)
-        self.logFileLength = 2  # Minutes before creating a new log file
+        self.logFileLength = 60  # Minutes before creating a new log file
                                    #    if > 1440 then feature is disable
         self.logPosition = 0    # Position of last data written
 
         # add controls
         self.cb_freeze = wx.CheckBox(self, -1, "Freeze")
         self.Bind(wx.EVT_CHECKBOX, self.on_cb_freeze, self.cb_freeze)
-        self.slider_label = wx.StaticText(self, -1, "Zoom (min): ")
-        self.slider_zoom = wx.Slider(self, -1, value=1, minValue=1, maxValue=60, style=wx.SL_AUTOTICKS | wx.SL_LABELS)
+        self.slider_label = wx.StaticText(self, -1, "x-Zoom")
+        self.slider_zoom = wx.Slider(self, -1, value=1, minValue=1,
+                                     maxValue=60, name="x-Zoom", size=(200,29),
+                                     style=wx.SL_AUTOTICKS | wx.SL_LABELS | wx.SL_HORIZONTAL)
         self.slider_zoom.SetTickFreq(10, 1)
         self.Bind(wx.EVT_COMMAND_SCROLL_THUMBTRACK, self.on_slider_width, self.slider_zoom)
 
@@ -80,15 +82,16 @@ class LogGraphPanel(wx.Panel):
 
         # Show on screen
         self.controllersHBox = wx.BoxSizer(wx.HORIZONTAL)
-        self.controllersHBox.Add(self.cb_freeze, 0)
-        self.controllersHBox.AddSpacer(30)
-        self.controllersHBox.Add(self.slider_label, 0)
-        self.controllersHBox.Add(self.slider_zoom, 1)
-        self.controllersHBox.Add(self.toolbar, 0, wx.EXPAND | wx.ALIGN_LEFT)
+        self.controllersHBox.Add(self.slider_label, 0, wx.ALIGN_CENTER_VERTICAL)
+        self.controllersHBox.Add(self.slider_zoom, 0, wx.SHAPED | wx.FIXED_MINSIZE | wx.ALIGN_CENTER_VERTICAL)
+        self.controllersHBox.AddSpacer(29)
+        self.controllersHBox.Add(self.cb_freeze, 0, wx.ALIGN_CENTER_VERTICAL)
+        self.controllersHBox.AddSpacer(29)
+        self.controllersHBox.Add(self.toolbar, 0, wx.ALIGN_TOP)
 
         self.vbox = wx.BoxSizer(wx.VERTICAL)
         self.vbox.Add(self.canvas, 1, wx.EXPAND | wx.GROW | wx.ALL)
-        self.vbox.Add(self.controllersHBox, 0, wx.EXPAND)
+        self.vbox.Add(self.controllersHBox, 0, wx.ALIGN_RIGHT | wx.ALIGN_TOP)
 
         # fit all to screen
         self.parent.GetSizer().Add(self, 1, wx.EXPAND | wx.GROW | wx.ALL)
@@ -149,7 +152,7 @@ class LogGraphPanel(wx.Panel):
 
         # finalize legend
         self.axes.set_ybound(0,100)
-        leg = self.axes.legend(loc='upper left', fancybox=True, shadow=True)
+        leg = self.axes.legend(loc='upper left', fancybox=False, shadow=False)
         leg.get_frame().set_alpha(0.4)
         self.lineLegendDict = {}
         for legline, lineName in zip(leg.get_lines(), variableNamesOnLegend):
@@ -189,16 +192,19 @@ class LogGraphPanel(wx.Panel):
         return self.realAnalogData[name].yRange[0] * self.realAnalogData[name].yRange[1] < 0
 
     def NormalizePositiveValue(self, value, yRange):
-        # unipolar range [X, Y] or [-X, -Y]
-        relevantEdge = yRange[0] if yRange[0] >= 0 else yRange[1]
-        return abs(value - relevantEdge) / abs(yRange[1] - yRange[0]) * 100
+        if value != None:
+            # unipolar range [X, Y] or [-X, -Y]
+            relevantEdge = yRange[0] if yRange[0] >= 0 else yRange[1]
+            return abs(value - relevantEdge) / abs(yRange[1] - yRange[0]) * 100
+        else:
+            return None
 
     def AddData(self, name, value):
         # keep all data arrays the same length. the time array should be updated last
         if len(self.allRealData[name].data) <= len(self.time):
             # Set value to previous value if NaN
-            if value == None:
-                value = self.allRealData[name].data[-1] if len(self.allRealData[name].data) > 0 else 0
+            # if value == None:
+            #     value = self.allRealData[name].data[-1] if len(self.allRealData[name].data) > 0 else 0
 
             self.allRealData[name].data += [value]
             if name in self.realAnalogData.keys():
@@ -237,8 +243,8 @@ class LogGraphPanel(wx.Panel):
                 self.WriteDataInLog(range(-1*self.dataWriteBulk,0))
                 self.logPosition = len(self.time)
 
-        # only show the graph when there's at least 2 data points
-        if len(self.time) >= 2:
+        # only show the graph when there's at least 2 data points and not frozen
+        if len(self.time) >= 2 and not self.cb_freeze.IsChecked():
             self.Redraw(len(self.time) == 2)
 
     def StopUpdates(self):
@@ -254,13 +260,19 @@ class LogGraphPanel(wx.Panel):
         """ Redraws the figure
         """
 
-        if not self.cb_freeze.IsChecked():
-            self.axes.set_xbound(lower=self.time[max(0,len(self.time)-int(self.slider_zoom.GetValue() * 60 * cfg.app.updateFrequency))],
-                                                 upper=self.time[-1])
-
-        for name in self.plottedAnalogData.keys():
-            self.plottedLines[name].set_ydata(np.append(self.plottedLines[name].get_ydata(), self.plottedAnalogData[name].data[-1]))
-            self.plottedLines[name].set_xdata(np.append(self.plottedLines[name].get_xdata(), self.time[-1]))
+        if len(self.time) > 0:
+            # Update x-axis (if not frozen)
+            if not self.cb_freeze.IsChecked():
+                self.axes.set_xbound(lower=self.time[max(0,len(self.time)-int(self.slider_zoom.GetValue() * 60 * cfg.app.updateFrequency))],
+                                                     upper=self.time[-1])
+            # Update data to plot
+            for name in self.plottedAnalogData.keys():
+                # print self.plottedAnalogData[name].data
+                # print np.array(self.plottedAnalogData[name].data, dtype=np.float)
+                self.plottedLines[name].set_ydata(np.array(self.plottedAnalogData[name].data, dtype=np.float))
+                self.plottedLines[name].set_xdata(self.time)
+                # self.plottedLines[name].set_ydata(np.append(self.plottedLines[name].get_ydata(), np.array(self.plottedAnalogData[name].data[-1], dtype=np.float)))
+                # self.plottedLines[name].set_xdata(np.append(self.plottedLines[name].get_xdata(), self.time[-1]))
 
         if firstTime:
             self.axes.get_xaxis().set_major_formatter(DateFormatter('%H:%M'))
