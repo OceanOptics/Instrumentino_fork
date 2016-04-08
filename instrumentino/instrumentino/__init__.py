@@ -285,8 +285,8 @@ class InstrumentinoApp(wx.App):
         '''
         dlg = wx.MessageDialog(self.mainFrame,
                                "Do you really want to close?\n" +
-                               "Data is saved automatically. ahah",
-                               "Confirm Exit", wx.OK | wx.CANCEL | wx.ICON_QUESTION)
+                               "Data is saved automatically.",
+                               "Confirm Exit", wx.OK | wx.CANCEL)
         result = dlg.ShowModal()
         dlg.Destroy()
         if result == wx.ID_OK:
@@ -342,12 +342,11 @@ class InstrumentinoApp(wx.App):
         info = wx.AboutDialogInfo()
         info.Name = self.system.name
         info.Version = self.system.version
-        info.Copyright = "2014 University of Basel"
+        info.Copyright = "2014 University of Basel - 2016 Univeristy of Maine"
         info.Description = wx.lib.wordwrap.wordwrap(self.system.description + '\r\nThis software is based on the instrumentino framework.',
                                                     350, wx.ClientDC(self.mainFrame))
-        info.WebSite = (
-            'http://www.chemie.unibas.ch/~hauser/open-source-lab/instrumentino/index.html')
-        info.Developers = ["Joel Koenka"]
+        #info.WebSite = ('http://www.chemie.unibas.ch/~hauser/open-source-lab/instrumentino/index.html')
+        info.Developers = ["Joel Koenka", "Nils Haentjens <nils.haentjens@maine.edu>"]
 
         info.License = wx.lib.wordwrap.wordwrap(
             'This software is released under GPLv3. The code is hosted on GitHub: https://github.com/yoelk/instrumentino\n' +
