@@ -56,6 +56,10 @@
           <label>About</label>
           <help>About</help>
         </object>
+        <object class="wxMenuItem" name="supportMenuItem">
+          <label>Support</label>
+          <help>Need help? Contact the support</help>
+        </object>
         <help>Help</help>
       </object>
       <style/>

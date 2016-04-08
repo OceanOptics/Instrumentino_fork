@@ -201,7 +201,7 @@ class LogGraphPanel(wx.Panel):
                         self.plottedLines[name] = self.axes.plot(
                             [datetime.now()],
                             [np.NAN],
-                            '-', lw=lineWidth, color=color,
+                            '.-', lw=lineWidth, color=color,
                             label=nameOnLegend, visible=graphVisible)[0]
 
                     # else:

@@ -376,7 +376,9 @@ class Arduino(InstrumentinoController):
         answerEnd = rxData.rfind("done")
         if answerEnd == -1:
             self.nonResponsiveCounter += 1
-            if wait == True or self.nonResponsiveCounter > self.maxNonResponseAllowed:
+            if (wait == True or
+                (self.nonResponsiveCounter >= self.maxNonResponseAllowed and
+                 self.nonResponsiveCounter % 2400 == self.maxNonResponseAllowed)):
                 cfg.LogFromOtherThread('Arduino did not respond %d times'%(self.nonResponsiveCounter), True)
             return None
 

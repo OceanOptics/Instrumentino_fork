@@ -8,7 +8,7 @@ import time
 import sys
 import pickle
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from instrumentino import cfg
 # from instrumentino.method import ActionsListCtrl
 # from instrumentino.sequence import MethodsListCtrl
@@ -26,14 +26,17 @@ class InstrumentinoApp(wx.App):
     '''
     This class implements the application
     '''
-    monitorUpdateDelayMilisec = Arduino.cacheReadDelayMilisec
+    monitorUpdateDelayMilisec = 250;  #Arduino.cacheReadDelayMilisec
     updateFrequency = 1000 / monitorUpdateDelayMilisec
+    maxDataGapSeconds = 5
 
     def __init__(self, system):
         self.system = system
         self.sysComps = self.system.comps
         self.sysActions = self.system.actions
         wx.App.__init__(self, False)
+
+        self.lastUpdateTime = datetime.now()
 
     def OnInit(self):
         '''
@@ -75,6 +78,8 @@ class InstrumentinoApp(wx.App):
             wx.EVT_MENU, self.OnClose, id=wx.xrc.XRCID('quitMenuItem'))
         self.mainFrame.Bind(
             wx.EVT_MENU, self.OnAbout, id=wx.xrc.XRCID('aboutMenuItem'))
+        self.mainFrame.Bind(
+            wx.EVT_MENU, self.OnSupport, id=wx.xrc.XRCID('supportMenuItem'))
 
         menusDict = dict(self.mainFrame.GetMenuBar().GetMenus())
         commMenu = [
@@ -141,9 +146,7 @@ class InstrumentinoApp(wx.App):
         self.timer.Start(self.monitorUpdateDelayMilisec)
 
     def OnLogUpdate(self, event):
-        '''
-        Update log
-        '''
+        ''' Update log '''
         (text, critical) = event.data
         cfg.Log(text)
         if critical:
@@ -304,6 +307,14 @@ class InstrumentinoApp(wx.App):
 
             self.mainFrame.Destroy()
 
+    def OnSupport(self, evt):
+        ''' Show support dialog'''
+        dlg = wx.MessageDialog(self.mainFrame,
+            'Just contact me \nNils <nils.haentjens@maine.edu>',
+            'A question ? Bug ? Error ?', wx.OK | wx.ICON_INFORMATION)
+        dlg.ShowModal()
+        dlg.Destroy()
+
     # def OnComm(self, controllerName, connectionSetupFunc):
     #     '''
     #     Communication setup helper function
@@ -360,10 +371,25 @@ class InstrumentinoApp(wx.App):
         '''
         Read system variables' values from controllers
         '''
+        # Check time of last update to look for gaps in data
+        # to test this section of code use:
+        #       kill -STOP [PID] to pause the process
+        #       kill -CONT [PID] to resume the process
+        timeNow = datetime.now()
+        if (cfg.AllOnline() and
+            (timeNow - self.lastUpdateTime).seconds > self.maxDataGapSeconds):
+            print 'Paused between ', self.lastUpdateTime, timeNow
+            cfg.LogFromOtherThread('Program was paused between' + \
+                                   self.lastUpdateTime.strftime('%H:%M:%S') + \
+                                   ' and ' + timeNow.strftime('%H:%M:%S'), True)
+        self.lastUpdateTime = timeNow
+
+        # Update cached variables from controllers
         for comp in self.sysComps:
             if cfg.IsCompOnline(comp):
                 comp.Update()
 
+        # Update signalLogFile and plot
         if cfg.AllOnline():
             self.logGraph.FinishUpdate()
 
