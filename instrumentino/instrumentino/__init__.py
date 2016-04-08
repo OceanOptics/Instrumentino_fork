@@ -5,10 +5,12 @@ import wx
 from wx import xrc, lib
 from wx.lib import wordwrap
 import time
+#import threading
 import sys
 import pickle
 import os
 from datetime import datetime, timedelta
+import subprocess
 from instrumentino import cfg
 # from instrumentino.method import ActionsListCtrl
 # from instrumentino.sequence import MethodsListCtrl
@@ -140,10 +142,21 @@ class InstrumentinoApp(wx.App):
         # self.UpdateControls()
         self.mainFrame.Show()
 
-        # Monitor periodically
+        # Monitor periodically (base on wxTimer event)
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.MonitorUpdate, self.timer)
         self.timer.Start(self.monitorUpdateDelayMilisec)
+        # Monitor periodically (based on threading and time)
+        #   no difference with wxTimer and error are not handle very well
+        # thread = threading.Thread(target=self.runMonitorUpdate, args=())
+        # thread.daemon = True                            # Daemonize thread
+        # thread.start()                                  # Start the execution
+
+        # Avoid system to go to sleep
+        if 'darwin' in sys.platform:
+            print('Running \'caffeinate\' on MacOSX to prevent the system from sleeping')
+            subprocess.Popen('caffeinate')
+
 
     def OnLogUpdate(self, event):
         ''' Update log '''
@@ -367,7 +380,14 @@ class InstrumentinoApp(wx.App):
         # Then we call wx.AboutBox giving it that info object
         wx.AboutBox(info)
 
-    def MonitorUpdate(self, event):
+    # def runMonitorUpdate(self):
+    #     # Alternative to wxtimer (not working on OSX while app in background)
+    #     while(True):
+    #         self.MonitorUpdate()
+    #         time.sleep(1/self.updateFrequency)
+
+
+    def MonitorUpdate(self, event=None):
         '''
         Read system variables' values from controllers
         '''
