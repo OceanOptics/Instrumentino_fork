@@ -2,7 +2,6 @@ from __future__ import division
 from instrumentino.util import SerialUtil
 
 from instrumentino import cfg
-#import serial
 import wx
 
 __author__ = 'yoelk'

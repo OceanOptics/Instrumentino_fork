@@ -2,7 +2,7 @@
 # @Author: nils
 # @Date:   2016-04-08 16:22:19
 # @Last Modified by:   nils
-# @Last Modified time: 2016-04-08 20:34:34
+# @Last Modified time: 2016-04-11 18:50:21
 
 # To check sensor is working correctly:
 # On OSX:
@@ -85,7 +85,6 @@ class WETLabs(InstrumentinoController):
             except:
                 print "Unexpected error updating cache of WETLabs sensor"
 
-
     def CacheUpdate(self):
         # it is buffering so require to get data out now
         # self.m_serial.reset_input_buffer()
@@ -109,6 +108,7 @@ class WETLabs(InstrumentinoController):
 
 class SysCompWETLabs(SysComp):
     ''' A WET Labs count variable based on analog var '''
+
     def __init__(self, _name, _vars, _helpline=''):
         SysComp.__init__(self, _name, _vars, WETLabs, _helpline)
 
@@ -116,13 +116,14 @@ class SysCompWETLabs(SysComp):
         for var in self.vars.values():
             var.FirstTimeOnline()
 
+
 class SysVarCountWETLabs(SysVarAnalog):
     ''' A WET Labs count variable based on analog var '''
 
     def __init__(self, _name, _rangeCount, _key,
                  _compName='', _helpline='', _units='',
                  _PreSetFunc=None, _PostGetFunc=None):
-        showEditBox = (_PreSetFunc != None)
+        showEditBox = (_PreSetFunc is not None)
         SysVarAnalog.__init__(self, _name, _rangeCount, WETLabs,
                               _compName, _helpline, showEditBox,
                               _units, _PreSetFunc, _PostGetFunc)

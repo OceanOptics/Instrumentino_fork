@@ -1,24 +1,28 @@
 from __future__ import division
-__author__ = 'yoelk'
-
 from instrumentino import cfg
 import wx
-from wx import xrc
-import wx.lib.masked as  masked
-import time
+import wx.lib.masked as masked
 from collections import OrderedDict
+
+__author__ = 'yoelk'
+
 
 class SysVar(object):
     '''
     A system variable
 
     Sub-classes should implement:
-    - Update()         -    Update the display panel and the log graph for this variable
+    - Update()         -    Update the display panel and the log graph
+                                for this variable
     - GetFunc()        -    read the value of the variable from the hardware
     - SetFunc(value)   -    Set the value of the variable in the hardware
-    - OnEdit(event)    -    called when the display panel of the variable is edited
+    - OnEdit(event)    -    called when the display panel
+                                of the variable is edited
     '''
-    def __init__(self, name, controllerClass, compName='', helpLine='', editable=True, PreSetFunc=None, PostGetFunc=None, showInSignalLog=True):
+
+    def __init__(self, name, controllerClass, compName='', helpLine='',
+                 editable=True, PreSetFunc=None, PostGetFunc=None,
+                 showInSignalLog=True):
         self.name = name
         self.compName = compName
         self.controllerClass = controllerClass
@@ -34,7 +38,7 @@ class SysVar(object):
         Call the sub-class' GetFunc()
         '''
         value = self.GetFunc()
-        if self.PostGetFunc != None:
+        if self.PostGetFunc is not None:
             self.PostGetFunc(value)
         return value
 
@@ -43,7 +47,7 @@ class SysVar(object):
         Call the sub-class' SetFunc()
         '''
         if self.editable:
-            if self.PreSetFunc != None:
+            if self.PreSetFunc is not None:
                 self.PreSetFunc(value)
             self.SetFunc(value)
 
@@ -64,6 +68,7 @@ class SysVar(object):
         '''
         return cfg.GetController(self.controllerClass)
 
+
 class SysVarAnalog(SysVar):
     '''
     An analog variable (float), represented by a wx.TextCtrl on the display
@@ -72,8 +77,13 @@ class SysVarAnalog(SysVar):
     - GetFunc()        -    read the value of the variable from the hardware
     - SetFunc(value)   -    Set the value of the variable in the hardware
     '''
-    def __init__(self, name, range, controllerClass, compName='', helpLine='', editable=True, units='', PreSetFunc=None, PostGetFunc=None, showInSignalLog=True):
-        SysVar.__init__(self, name, controllerClass, compName, helpLine, editable, PreSetFunc, PostGetFunc, showInSignalLog)
+
+    def __init__(self, name, range, controllerClass, compName='', helpLine='',
+                 editable=True, units='', PreSetFunc=None, PostGetFunc=None,
+                 showInSignalLog=True):
+        SysVar.__init__(self, name, controllerClass, compName,
+                        helpLine, editable, PreSetFunc, PostGetFunc,
+                        showInSignalLog)
         self.units = units
         self.range = range
         self.monitorTextCtrl = None
@@ -83,7 +93,7 @@ class SysVarAnalog(SysVar):
         '''
         Update the variable's panel with newly read data
         '''
-        if self.monitorTextCtrl != None and value != None:
+        if self.monitorTextCtrl is not None and value is not None:
             self.monitorTextCtrl.ChangeValue(value)
 
     def OnEdit(self, event):
@@ -105,24 +115,27 @@ class SysVarAnalog(SysVar):
         sizer = wx.FlexGridSizer(rows=rows, cols=2)
         panel = wx.Panel(parent)
         panel.SetSizer(sizer)
-        sizer.Add(wx.StaticText(panel, label=self.name + ' (' + self.units + '):'))
-        self.monitorTextCtrl = masked.NumCtrl(panel,
-                                              value=0,
-                                              integerWidth=cfg.numIntegerPartWidth,
-                                              fractionWidth=cfg.numFractionPartWidth,
-                                              min=self.range[0],
-                                              max=self.range[1],
-                                              style=wx.TE_CENTRE | wx.TE_READONLY)
+        sizer.Add(
+            wx.StaticText(panel, label=self.name + ' (' + self.units + '):'))
+        self.monitorTextCtrl = masked.NumCtrl(
+            panel,
+            value=0,
+            integerWidth=cfg.numIntegerPartWidth,
+            fractionWidth=cfg.numFractionPartWidth,
+            min=self.range[0],
+            max=self.range[1],
+            style=wx.TE_CENTRE | wx.TE_READONLY)
         sizer.Add(self.monitorTextCtrl)
         if self.editable:
             sizer.Add(wx.StaticText(panel, label='Set to:'))
-            editTextCtrl = masked.NumCtrl(panel,
-                                          value=0,
-                                          integerWidth=cfg.numIntegerPartWidth,
-                                          fractionWidth=cfg.numFractionPartWidth,
-                                          min=self.range[0],
-                                          max=self.range[1],
-                                          style=wx.TE_CENTRE | wx.WANTS_CHARS)
+            editTextCtrl = masked.NumCtrl(
+                panel,
+                value=0,
+                integerWidth=cfg.numIntegerPartWidth,
+                fractionWidth=cfg.numFractionPartWidth,
+                min=self.range[0],
+                max=self.range[1],
+                style=wx.TE_CENTRE | wx.WANTS_CHARS)
             editTextCtrl.Bind(wx.EVT_KEY_DOWN, self.OnEdit)
             sizer.Add(editTextCtrl)
 
@@ -131,14 +144,18 @@ class SysVarAnalog(SysVar):
 
 class SysVarDigital(SysVar):
     '''
-    A digital variable (multiple choice), represented by a Set of wx.RadioButtons on the display
+    A digital variable (multiple choice)
+    represented by a Set of wx.RadioButtons on the display
 
     Sub-classes should implement:
     - GetFunc()        -    read the value of the variable from the hardware
     - SetFunc(value)   -    Set the value of the variable in the hardware
     '''
-    def __init__(self, name, states, controllerClass, compName='', helpLine='', editable=True, PreSetFunc=None, PostGetFunc=None):
-        SysVar.__init__(self, name, controllerClass, compName, helpLine, editable, PreSetFunc, PostGetFunc, False)
+
+    def __init__(self, name, states, controllerClass, compName='', helpLine='',
+                 editable=True, PreSetFunc=None, PostGetFunc=None):
+        SysVar.__init__(self, name, controllerClass, compName,
+                        helpLine, editable, PreSetFunc, PostGetFunc, False)
         self.radioButtons = None
         self.states = states
 
@@ -146,7 +163,7 @@ class SysVarDigital(SysVar):
         '''
         Update the variable's panel with newly read data
         '''
-        if self.radioButtons != None and value != None:
+        if self.radioButtons is not None and value is not None:
             try:
                 for rbName, rb in self.radioButtons.items():
                     rb.SetValue(rbName == value)
@@ -179,8 +196,10 @@ class SysVarDigital(SysVar):
 
 class SysComp(object):
     '''
-    A system component, which has variables, and is represented on the screen as a panel containing the variables' panels
+    A system component, which has variables, and
+    is represented on the screen as a panel containing the variables' panels
     '''
+
     def __init__(self, name, vars, controllerClass, helpLine=''):
         self.name = name
         self.controllerClass = controllerClass
@@ -193,7 +212,8 @@ class SysComp(object):
         '''
         Create a panel for the component, based on its variables
 
-        Sub-classes may implement FirstTimeOnline() to do some initialization when communication is established
+        Sub-classes may implement FirstTimeOnline()
+        to do some initialization when communication is established
         '''
         vars = self.vars.values()
         if len(vars) == 0:
@@ -214,17 +234,18 @@ class SysComp(object):
         '''
         Update all variables
         '''
-        if self.online == False:
+        if self.online is False:
             self.online = True
             self.FirstTimeOnline()
 
-        if self.panel != None:
+        if self.panel is not None:
             for var in self.vars.values():
                 var.Update()
 
     def FirstTimeOnline(self):
         '''
-        Called when communication is first setup. To be implemented by subclass.
+        Called when communication is first setup.
+        To be implemented by subclass.
         '''
         pass
 
@@ -232,7 +253,7 @@ class SysComp(object):
         '''
         Enable/disable the availability of the panel on the screen
         '''
-        if self.panel != None:
+        if self.panel is not None:
             self.panel.Enable(isEnabled)
 
     def GetController(self):

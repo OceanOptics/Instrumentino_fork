@@ -5,9 +5,10 @@ import os
 import sys
 from pkg_resources import resource_filename
 import wx
+# from wx import xrc
 import threading
 
-__author__ = 'yoelk'
+__author__ = ['yoelk', 'doizuc']
 
 '''
 Instrumentino configuration variables
@@ -15,7 +16,8 @@ Instrumentino configuration variables
 # The way we show numbers
 numIntegerPartWidth = 6
 numFractionPartWidth = 3
-numStringFormat = '{:' + str(numIntegerPartWidth) + '.' + str(numFractionPartWidth) + 'f}'
+numStringFormat = '{:' + str(numIntegerPartWidth) + \
+    '.' + str(numFractionPartWidth) + 'f}'
 
 # Files handeled
 methodWildcard = 'Method file (*.mtd)|*.mtd'
@@ -31,15 +33,15 @@ initial_path = None
 
 app = None
 mainFrame = None
-logTextCtrl = None
+# logTextCtrl = None
 logGraph = None
-commandsLogFile = None
 timeCurrentSignalsLogFile = None
 signalsLogFile = None
 systemUid = None
 
 controllers = []
 userStopped = False
+
 
 def InitVariables(arguApp):
     '''
@@ -51,30 +53,25 @@ def InitVariables(arguApp):
     global mainFrame
     mainFrame = arguApp.mainFrame
 
-    #global logTextCtrl
+    # global logTextCtrl
     # logTextCtrl = wx.xrc.XRCCTRL(arguApp.mainFrame, 'logTextCtrl')
     # logTextCtrl.SetEditable(False)
 
     global logGraph
     logGraph = arguApp.logGraph
 
-    #global timeNow
-    timeNow = datetime.now().strftime('%Y_%m_%d-%H_%M_%S')
-
-    #global commandsLogFile
-    #commandsLogFile = open(LogPath(timeNow + '.txt'), 'w')
-
     global signalsLogFile
-    #signalsLogFile = open(LogPath(timeNow + '.csv'), 'w')
     global timeCurrentSignalsLogFile
     timeCurrentSignalsLogFile = datetime.now()
 
     global systemUid
     systemUid = arguApp.system.GetSystemUid()
 
+
 def AddControllerIfNeeded(controllerClass):
     '''
-    add a controller to the needed controllers list, only if it doesn't exist already
+    add a controller to the needed controllers list
+    only if it doesn't exist already
     '''
     global controllers
     for c in controllers:
@@ -84,10 +81,12 @@ def AddControllerIfNeeded(controllerClass):
     # if reached here, add an object of the given class
     controllers += [controllerClass()]
 
+
 def Close():
     global controllers
     for c in controllers:
         c.Close()
+
 
 def AllOnline():
     '''
@@ -101,6 +100,7 @@ def AllOnline():
     # if reached here and list isn't empty all are online
     return (len(controllers) > 0)
 
+
 def IsCompOnline(sysComp):
     '''
     check if the controller of a component is online
@@ -112,6 +112,7 @@ def IsCompOnline(sysComp):
 
     # if reached here, it's not online
     return False
+
 
 def GetController(controllerClass):
     '''
@@ -125,19 +126,15 @@ def GetController(controllerClass):
     # if reached here, no controller exists
     return None
 
+
 def ResourcePath(relativePath=''):
     '''
     Get the resource path
     '''
-
-    #         """ Get absolute path to resource, works for dev and for PyInstaller """
-    #         try:
-    #             # PyInstaller creates a temp folder and stores path in _MEIPASS
-    #             basePath = sys._MEIPASS
-    #         except Exception:
-    #             basePath = os.path.dirname(resource_filename('instrumentino.resources', 'main.xrc'))
-    basePath = os.path.dirname(resource_filename('instrumentino.resources', 'main.xrc'))
+    basePath = os.path.dirname(
+        resource_filename('instrumentino.resources', 'main.xrc'))
     return os.path.join(basePath, relativePath)
+
 
 def GetOrCreateDirectory(name):
     '''
@@ -145,7 +142,8 @@ def GetOrCreateDirectory(name):
     '''
     global initial_path
 
-    initial_path = initial_path or os.path.abspath(os.path.dirname(sys.argv[0]))
+    initial_path = initial_path or os.path.abspath(
+        os.path.dirname(sys.argv[0]))
     path = initial_path + '/' + name
 
     try:
@@ -155,17 +153,20 @@ def GetOrCreateDirectory(name):
 
     return path + '/'
 
+
 def UserFilesPath(relativePath=''):
     '''
     Get the user directory
     '''
     return GetOrCreateDirectory('user') + relativePath
 
+
 def LogPath(relativePath=''):
     '''
     Get the log directory
     '''
     return GetOrCreateDirectory('log') + relativePath
+
 
 def Log(text):
     '''
@@ -174,10 +175,11 @@ def Log(text):
     global logTextCtrl
     global commandsLogFile
 
-    if logTextCtrl != None:
+    if logTextCtrl is not None:
         logTextCtrl.WriteText(text + '\r')
-    if commandsLogFile != None:
+    if commandsLogFile is not None:
         commandsLogFile.write(text + '\r')
+
 
 def LogFromOtherThread(text, critical=False):
     '''
@@ -186,6 +188,7 @@ def LogFromOtherThread(text, critical=False):
     global mainFrame
     wx.PostEvent(mainFrame, ResultEvent(EVT_LOG_UPDATE, (text, critical)))
 
+
 def UpdateControlsFromOtherThread(runningOperation=False):
     '''
     Update the control buttons while running a method/sequence
@@ -193,15 +196,17 @@ def UpdateControlsFromOtherThread(runningOperation=False):
     global mainFrame
     wx.PostEvent(mainFrame, ResultEvent(EVT_UPDATE_CONTROLS, runningOperation))
 
+
 def Sleep(seconds, userStopEnabled=True):
     '''
     Sleep, and wake up when user pressed the stop button
     '''
-    time.sleep(seconds%1)
+    time.sleep(seconds % 1)
     end = time.time() + int(seconds)
     while time.time() <= end:
         if userStopped and userStopEnabled:
             return
+
 
 def PopMessage(text=''):
     '''
@@ -209,6 +214,7 @@ def PopMessage(text=''):
     '''
     e = threading.Event()
     wx.PostEvent(mainFrame, ResultEvent(EVT_POP_MESSAGE, (text, e, False)))
+
 
 def WaitForUser(text=''):
     '''
@@ -219,16 +225,19 @@ def WaitForUser(text=''):
     time.sleep(3)
     e.wait()
 
+
 def HideVariableFromLog(varName):
     '''
     Hide a variable trace from the signal log graph
     '''
     logGraph.HideVariableFromLog(varName)
 
+
 class ResultEvent(wx.PyEvent):
     '''
     Simple event to carry arbitrary result data.
     '''
+
     def __init__(self, eventType, data):
         wx.PyEvent.__init__(self)
         self.SetEventType(eventType)

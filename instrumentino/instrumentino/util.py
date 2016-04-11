@@ -1,6 +1,4 @@
 from __future__ import division
-__author__ = 'yoelk'
-
 import sys
 import os
 import serial
@@ -12,22 +10,30 @@ except ImportError:
     pass
 import itertools
 
+__author__ = 'yoelk'
+
+
 class Chdir:
     '''
-    Instantiating this class changes the current directory until the object is deleted
+    Instantiating this class changes the current directory
+    until the object is deleted
     '''
-    def __init__( self, newPath ):
+
+    def __init__(self, newPath):
         self.savedPath = os.getcwd()
         os.chdir(newPath)
 
-    def __del__( self ):
-        os.chdir( self.savedPath )
+    def __del__(self):
+        os.chdir(self.savedPath)
 
 
 """
 Lists the serial ports available on the computer.
-some of the code was taken from Eli Bendersky (eliben@gmail.com), License: this code is in the public domain
+some of the code was taken from Eli Bendersky (eliben@gmail.com),
+License: this code is in the public domain
 """
+
+
 class SerialUtil():
     def enumerate_serial_ports(self):
         """ Uses the Win32 registry to return an
@@ -59,14 +65,14 @@ class SerialUtil():
         return '\\\\.\\' + portname
 
     def getSerialPortsList(self):
-            ports = []
-            if os.name == 'nt':
-                for portname in self.enumerate_serial_ports():
-                    ports.append(portname)
-            elif os.name == 'posix':
-                ports = glob.glob('/dev/tty.*')
+        ports = []
+        if os.name == 'nt':
+            for portname in self.enumerate_serial_ports():
+                ports.append(portname)
+        elif os.name == 'posix':
+            ports = glob.glob('/dev/tty.*')
 
-            return ports
+        return ports
 
 if __name__ == '__main__':
     print SerialUtil().getSerialPortsList()
