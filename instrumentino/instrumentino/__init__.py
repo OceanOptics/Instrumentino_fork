@@ -323,8 +323,10 @@ class InstrumentinoApp(wx.App):
     def OnSupport(self, evt):
         ''' Show support dialog'''
         dlg = wx.MessageDialog(self.mainFrame,
-            'Just contact me \nNils <nils.haentjens@maine.edu>',
-            'A question ? Bug ? Error ?', wx.OK | wx.ICON_INFORMATION)
+             'Send bugreports, fixes, enhancements,'\
+             't-shirts, money, beer & pizza to'\
+             'Nils <nils.haentjens@maine.edu>',
+             'A question ? Bug ? Error ?', wx.OK | wx.ICON_INFORMATION)
         dlg.ShowModal()
         dlg.Destroy()
 
