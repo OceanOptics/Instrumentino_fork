@@ -1,6 +1,9 @@
 Instrumentino
 =============
 
+This fork of instrumentino renamed inlinino, is design to log data from sensors
+(with analog or serial interface) continuisly during days.
+
 Instrumentino is an open-source modular graphical user interface framework for controlling Arduino based experimental instruments
 
 It consists of two separate programs:
