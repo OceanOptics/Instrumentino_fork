@@ -93,8 +93,11 @@ class SysVarAnalog(SysVar):
         '''
         Update the variable's panel with newly read data
         '''
-        if self.monitorTextCtrl is not None and value is not None:
-            self.monitorTextCtrl.ChangeValue(value)
+        if self.monitorTextCtrl is not None:
+            if value is not None:
+                self.monitorTextCtrl.SetValue(value)
+            else:
+                self.monitorTextCtrl.SetValue(-9999)
 
     def OnEdit(self, event):
         '''
@@ -119,7 +122,7 @@ class SysVarAnalog(SysVar):
             wx.StaticText(panel, label=self.name + ' (' + self.units + '):'))
         self.monitorTextCtrl = masked.NumCtrl(
             panel,
-            value=0,
+            value=self.range[0],
             integerWidth=cfg.numIntegerPartWidth,
             fractionWidth=cfg.numFractionPartWidth,
             min=self.range[0],
@@ -130,7 +133,7 @@ class SysVarAnalog(SysVar):
             sizer.Add(wx.StaticText(panel, label='Set to:'))
             editTextCtrl = masked.NumCtrl(
                 panel,
-                value=0,
+                value=self.range[0],
                 integerWidth=cfg.numIntegerPartWidth,
                 fractionWidth=cfg.numFractionPartWidth,
                 min=self.range[0],
