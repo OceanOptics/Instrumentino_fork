@@ -2,7 +2,7 @@
 # @Author: nils
 # @Date:   2016-04-08 16:22:19
 # @Last Modified by:   nils
-# @Last Modified time: 2016-04-11 18:50:21
+# @Last Modified time: 2016-04-13 17:22:41
 
 # To check sensor is working correctly:
 # On OSX:
@@ -40,11 +40,15 @@ class WETLabs(InstrumentinoController):
     # Instrument name
     m_name = "WET Labs"
 
+    # Non Responsive Counter
+    m_nNonResponse = 0
+    m_maxNonResponse = 10
+
     # Cache
     m_countValuesCache = {}
-
-    # Timer Event to update cache
-    timer = None
+    m_thread = None
+    m_serial = None
+    m_active = False
 
     def __init__(self):
         InstrumentinoController.__init__(self, self.m_name)
@@ -61,43 +65,65 @@ class WETLabs(InstrumentinoController):
             self.m_serial.port = _port
             self.m_serial.open()
         except:
-            cfg.LogFromOtherThread('BB3 did not respond', True)
+            cfg.LogFromOtherThread('%s did not respond' % (self.m_name), True)
             return None
 
         if self.m_serial.isOpen():
+            # Set state to active (allow runCacheUpdate to run)
+            self.m_active = True
             # Create thread to update cache
-            thread = Thread(target=self.runCacheUpdate, args=())
-            thread.daemon = True
-            thread.start()
+            self.m_thread = Thread(target=self.RunCacheUpdate, args=())
+            self.m_thread.daemon = True
+            self.m_thread.start()
             return True
         else:
             return None
 
     def Close(self):
+        # Stop thread updating cache
+        if self.m_thread is not None:
+            self.m_active = False
+            self.m_thread.join()
+        # Close serial connection
         if self.m_serial.isOpen():
             self.m_serial.close()
 
-    def runCacheUpdate(self):
-        while(True):
+    def RunCacheUpdate(self):
+        while(self.m_active):
             sleep(self.m_serial.timeout)
             try:
                 self.CacheUpdate()
             except:
-                print "Unexpected error updating cache of WETLabs sensor"
+                self.NoResponse('Unexpected error while updating cache.\n'
+                                'Serial adaptor might be unplug.')
 
     def CacheUpdate(self):
-        # it is buffering so require to get data out now
-        # self.m_serial.reset_input_buffer()
-        data = self.m_serial.readline()
+        # read all line in buffer
+        data = self.m_serial.readlines()
         if data:
+            # keep only most recent data
+            data = data[-1]
             # There is data, update the cache
             data = data.split('\t')
             for i in range(2, 8, 2):
                 self.m_countValuesCache[data[i]] = int(data[i + 1])
         else:
-            # No data, cache is set to None
-            for key in self.m_countValuesCache.keys():
-                self.m_countValuesCache[key] = None
+            self.NoResponse('No data after updating cache.\n'
+                            'Serial cable might be unplug.')
+
+    def NoResponse(self, _msg):
+        # Set cache to None
+        for key in self.m_countValuesCache.keys():
+            self.m_countValuesCache[key] = None
+        # Error message if necessary
+        self.m_nNonResponse += 1
+        if (self.m_nNonResponse >= self.m_maxNonResponse and
+                self.m_nNonResponse % 2400 == self.m_maxNonResponse):
+            cfg.LogFromOtherThread(
+                '%s did not respond %d times\n%s' % (self.m_name,
+                                                     self.m_nNonResponse,
+                                                     _msg),
+                True)
 
     def CacheRead(self):
         return self.m_countValuesCache
@@ -141,11 +167,13 @@ if __name__ == '__main__':
 
     # Connect with port
     BB3_349.Connect('/dev/tty.usbserial-FTZ267A6A')
+    sleep(BB3_349.m_serial.timeout)
 
-    # UpdateCache 10 times
-    for i in range(1, 10):
-        BB3_349.CacheUpdate()
-        print BB3_349.CacheRead()
+    if BB3_349.m_active:
+        # UpdateCache 10 times
+        for i in range(1, 10):
+            sleep(BB3_349.m_serial.timeout)
+            print BB3_349.CacheRead()
 
     # Close connection
     BB3_349.Close()

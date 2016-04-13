@@ -5,7 +5,6 @@ To do list
 - OSX: if the window is in background,
        then the application will run at a slower pace,
        source of bug: wxtimer is not called anymore
-- Missing Error Message when WET Labs instrument is unplugged
 
 ## List of improvements:
 - Make nice setup package
