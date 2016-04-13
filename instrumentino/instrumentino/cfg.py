@@ -131,8 +131,7 @@ def ResourcePath(relativePath=''):
     '''
     Get the resource path
     '''
-    basePath = os.path.dirname(
-        resource_filename('instrumentino.resources', 'main.xrc'))
+    basePath = resource_filename('instrumentino','resources')
     return os.path.join(basePath, relativePath)
 
 
@@ -168,17 +167,14 @@ def LogPath(relativePath=''):
     return GetOrCreateDirectory('log') + relativePath
 
 
-def Log(text):
-    '''
-    Log an event
-    '''
-    global logTextCtrl
-    global commandsLogFile
+# def Log(text):
+#     '''
+#     Log an event
+#     '''
+#     global logTextCtrl
 
-    if logTextCtrl is not None:
-        logTextCtrl.WriteText(text + '\r')
-    if commandsLogFile is not None:
-        commandsLogFile.write(text + '\r')
+#     if logTextCtrl is not None:
+#         logTextCtrl.WriteText(text + '\r')
 
 
 def LogFromOtherThread(text, critical=False):

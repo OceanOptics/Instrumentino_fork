@@ -54,6 +54,10 @@ class InstrumentinoApp(wx.App):
         self.mainFrame.SetTitle(self.system.name)
         self.mainFrame.Bind(wx.EVT_CLOSE, self.OnClose)
 
+        # Set icon
+        # self.mainFrame.SetIcon(wx.IconFromLocation(
+        #     cfg.ResourcePath('Inlinino_icon_64.png')))
+
         # log
         self.logGraph = LogGraphPanel(
             wx.xrc.XRCCTRL(self.mainFrame, 'logGraphPage'), self.sysComps)
@@ -118,7 +122,7 @@ class InstrumentinoApp(wx.App):
     def OnLogUpdate(self, event):
         ''' Update log '''
         (text, critical) = event.data
-        cfg.Log(text)
+        # cfg.Log(text)
         if critical:
             dlg = wx.MessageDialog(self.mainFrame,
                                    text,
