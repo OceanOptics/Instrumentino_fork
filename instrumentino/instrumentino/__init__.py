@@ -55,8 +55,11 @@ class InstrumentinoApp(wx.App):
         self.mainFrame.Bind(wx.EVT_CLOSE, self.OnClose)
 
         # Set icon
-        # self.mainFrame.SetIcon(wx.IconFromLocation(
-        #     cfg.ResourcePath('Inlinino_icon_64.png')))
+        _icon = wx.EmptyIcon()
+        _icon.CopyFromBitmap(wx.Bitmap(
+            cfg.ResourcePath('Inlinino.ico'),
+            wx.BITMAP_TYPE_ICO))
+        self.mainFrame.SetIcon(_icon)
 
         # log
         self.logGraph = LogGraphPanel(

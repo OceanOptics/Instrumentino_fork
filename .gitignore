@@ -11,18 +11,18 @@ __pycache__/
 env/
 build/
 develop-eggs/
-# dist/
+dist/
 downloads/
-# eggs/
-# .eggs/
+eggs/
+.eggs/
 lib/
 lib64/
 parts/
 sdist/
 var/
-# *.egg-info/
+*.egg-info/
 .installed.cfg
-# *.egg
+*.egg
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -106,3 +106,6 @@ Release/
 *.mk
 *.pyc
 *.project
+
+# Specific to inlinino
+log/

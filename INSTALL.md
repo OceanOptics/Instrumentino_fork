@@ -13,12 +13,24 @@ the step install Controllino.
 ## Installing Inlinino
 Inlinino is written in python 2.7, so it runs on Windows, OSX and Linux.
 
-Install python 2.7 on your OS.
-Install the python package necessary to run the Inlinino:
-<script>
-  cd inlinino/instrumentino/setup.py
-  python setup.py install
-</script>
+Most Unix systems include python 2.7 you can check that it's install with:
+```
+python --version
+```
+Windows does not include python 2.7 natively so you have to install it.
+
+Install the python package necessary to run Inlinino (if use virtualenv replace
+pip by the appropriate command, ex: conda):
+```
+pip install pyserial
+pip install matplotlib
+pip install numpy
+```
+Install another package wxPython:
+- On OSX with Anaconda or Canopy: both come with wxPython
+`conda install wxPython`
+- On OSX without virtualenv or Windows: download and install package from:
+[wxPython.org](http://www.wxpython.org/download.php#msw)
 
 Everything should be setup you can now run Inlinino from one of the existing
 system configurations or create your own configuration.
