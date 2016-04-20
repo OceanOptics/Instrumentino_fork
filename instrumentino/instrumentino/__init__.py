@@ -158,9 +158,10 @@ class InstrumentinoApp(wx.App):
     def OnSupport(self, evt):
         ''' Show support dialog'''
         dlg = wx.MessageDialog(self.mainFrame,
-                               'Send bug reports, fixes, enhancements, '
-                               't-shirts, money, beer & pizza to '
-                               'Nils <nils.haentjens@maine.edu>',
+                               'Send questions, bug reports, fixes, '
+                               'enhancements, t-shirts, money, lobsters & '
+                               'beers to Nils\n'
+                               '<nils.haentjens+inlinino@maine.edu>',
                                'A question ? Bug ? Error ?',
                                wx.OK | wx.ICON_INFORMATION)
         dlg.ShowModal()
@@ -174,7 +175,7 @@ class InstrumentinoApp(wx.App):
         info = wx.AboutDialogInfo()
         info.Name = self.system.name
         info.Version = self.system.version
-        info.Copyright = "2014 University of Basel - 2016 Univeristy of Maine"
+        #info.Copyright = "2014 University of Basel - 2016 Univeristy of Maine"
         info.Description = wx.lib.wordwrap.wordwrap(
             self.system.description +
             '\r\nThis software is based on the instrumentino framework.',
@@ -182,12 +183,16 @@ class InstrumentinoApp(wx.App):
         # info.WebSite = ('http://www.chemie.unibas.ch/~hauser/'
         #                 'open-source-lab/instrumentino/index.html')
         info.Developers = [
-            "Joel Koenka", "Nils Haentjens <nils.haentjens@maine.edu>"]
+            'Joel Koenka (University of Basel)',
+            'Nils Haentjens (Univeristy of Maine) '
+            '<nils.haentjens+inlinino@maine.edu>']
 
         info.License = wx.lib.wordwrap.wordwrap(
             'This software is released under GPLv3. The code is hosted on '
-            'GitHub: https://github.com/yoelk/instrumentino\n'
-            'When using Instrumentino for scientific publications, please cite'
+            'GitHub: https://github.com/OceanOptics/Inlinino and is a fork '
+            'from this repo: https://github.com/yoelk/instrumentino\n'
+            'When using the sofware for scientific publications, the based '
+            'software Instrumentino is happy to be cited by'
             ' the release article: http://www.sciencedirect.com/science/'
             'article/pii/S0010465514002112',
             500, wx.ClientDC(self.mainFrame))

@@ -33,6 +33,20 @@ Two separate programs:
 The other folder contains:
 - `configurations`: python scripts to start inlinino with a given configuration
 
+## Starting Inlinino
+After following the installation steps described in INSTALL.md, Inlinino can be started for a specific configuration.
+On OSX:
+```
+cd configurations/test/
+nice -20 pythonw __main__.py
+```
+Note: use `nice` to set the application priority by (-20 is the highest), use `pythonw` instead of `python` to show the GUI of the application.
+On Windows:
+- Navigate to configurations\test\ or another configuration\Tara\
+- Launch the applicaion by double clicking `__main__.py` or `__main__.pyw`
+Note: by default *.py are started with `python.exe` and *.pyw are started by `pythonw.exe`. `python.exe` will start with a terminal window and will show any error or print statement ouput by the application whereas `pythonw.exe` will
+show only the GUI of the application and no error is shown.
+
 ## Credits
 This fork of Instrumentino was written by Nils (University of Maine).
 Thank you to yoelk for sharing is work.

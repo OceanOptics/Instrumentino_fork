@@ -10,4 +10,4 @@ To do list
 - Make nice setup package
 - Put all the configuration in json file
 - Order of field in csv file should be ordered by instruments
-- Reconnect Arduino automatically if disconnected
+- Reconnect controllers automatically if disconnected

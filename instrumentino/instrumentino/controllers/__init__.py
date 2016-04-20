@@ -33,7 +33,7 @@ class InstrumentinoController(object):
                 serialPortsList,
                 wx.CHOICEDLG_STYLE
                 )
-        dlg.SetSelection(len(serialPortsList)-1)  # Select last element of list
+        # dlg.SetSelection(len(serialPortsList)-1)# Select last element of list
         if dlg.ShowModal() == wx.ID_OK:
             self.online = self.Connect(dlg.GetStringSelection())
             cfg.UpdateControlsFromOtherThread()
