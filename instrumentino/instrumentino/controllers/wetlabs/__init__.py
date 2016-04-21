@@ -2,7 +2,7 @@
 # @Author: nils
 # @Date:   2016-04-08 16:22:19
 # @Last Modified by:   nils
-# @Last Modified time: 2016-04-13 17:22:41
+# @Last Modified time: 2016-04-21 08:28:04
 
 # To check sensor is working correctly:
 # On OSX:
@@ -107,9 +107,13 @@ class WETLabs(InstrumentinoController):
             data = data.split('\t')
             for i in range(2, 8, 2):
                 self.m_countValuesCache[data[i]] = int(data[i + 1])
+            # Reset no response count
+            self.m_nNonResponse = 0
         else:
             self.NoResponse('No data after updating cache.\n'
-                            'Serial cable might be unplug.')
+                            'Suggestions:\n'
+                            '\t- Serial cable might be unplug.\n'
+                            '\t- Sensor power is off.\n')
 
     def NoResponse(self, _msg):
         # Set cache to None
