@@ -1,5 +1,5 @@
-Inlinino
-========
+Inlinino - Instrumentino v1 Fork
+=============================
 _A simple data logger_
 
 ## Purpose of the project
@@ -13,8 +13,8 @@ Instrumentino is an open-source modular graphical user interface framework for
 controlling Arduino based experimental instruments and any other instrument
 for which python API exist or can be developped.
 
-## Differences between Instrumentino and Inlinino
-The main difference between Instrumentino and Inlinino resid in the fact that
+## Differences between Instrumentino v1 and Inlinino
+The main difference between Instrumentino and Inlinino resids in the fact that
 Instrumentino is build to control instruments during short period of time
 (less than a day) whereas inlinino can only read data from those instruments
 but during an extensive period of time. In fact, inlinino use a ring buffer to
